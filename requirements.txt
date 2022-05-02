@@ -1,0 +1,2 @@
+numpy~=1.22.3
+baudot~=0.1.1.post2
