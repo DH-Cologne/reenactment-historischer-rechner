@@ -27,6 +27,7 @@ class CPU:
     # Ask for its memory address(es)
     # Ask for its modifiers
     # Execute it
+    # (This will need to be partially reimplemented once we have a new representation of the commands)
     
     self._log("CPU executes step ", self.currentStep)
     self._log("CPU status: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
@@ -40,6 +41,8 @@ class CPU:
       befehl, address = ("0", 0)
     
     self._log("Command parsed into: ", befehl, " ", address)
+    
+    ## 2. Now we have parsed, we execute the commands.
     
     # Sprungbefehle E and F
     if befehl == "E" or befehl == "F":
@@ -80,13 +83,19 @@ class CPU:
       self._a(self._a() & address)
     elif befehl == "DX":
       self.printMemory(address)
+    
+    # ... and put the command for getting the next command into the Befehlsregister
     self.b = self.c
+    self.currentStep += 1
      
     self._log("CPU status after: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
     self._log("Done with step ", self.currentStep)
-    self.currentStep += 1
   
   def _parseCommand(self, commandString):
+  """
+  Parse the command and return a pair of Befehl and Address. 
+  Address can be None, e.g., for the command "D"
+  """
     pattern = re.compile(r"^([A-Z]+)(\d+)?$")
     m = pattern.match(str(self.b))
     if not m: 
@@ -94,25 +103,30 @@ class CPU:
     return (m.group(1), int(m.group(2)) if m.group(2) else None)
     
   def printMemory(self, cell=None):
+  """Print a simple image of the entire memory or a single block """
     if cell:
       print((cell, self.memory[cell]))
     else:
       print([(index, value) for index, value in enumerate(self.memory) ])
     
-  
   def _log(self, *msg):
+  """Log a message, if verbosity is turned on in the object"""
     if self.verbose:
       print("".join([str(x) for x in msg]))
     
   def _a(self, value = None):
+  """ Easier set and get access to the accumulator """
     if value:
       self.memory[4] = value
     else:
       return self.memory[4]
-    
-   
+  
   def getRegister(self, character):
-    """ Return the contents of the given register. Register is given as characters b or c """
+    """
+    Return the contents of the given register. Register is given as characters b or c.
+    Don't think we need this method
+    
+    """
     if character == "b": 
       return self.b
     if character == "c":
