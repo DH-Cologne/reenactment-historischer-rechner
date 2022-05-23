@@ -1,6 +1,8 @@
 import numpy as np
+import re
 
 """
+Notizen aus Stunde am 03.05.2022
 class Wort
 - getBinary(zelle)
 - parse(str) --> Wort 
@@ -17,18 +19,60 @@ class Klartext(Wort)
 class Ganzzahl(Wort)
 
 Binärzahl als Liste [0,1,0,0,1...] mit len = 38
+
+
+Repräsentation von Daten
+1. und 2. Bit: Type
+3. Bit 0 oder 1? Umschalter zwischen Zahlen und Buchstaben?
+7 Zeichen a 5 bits
+
+Zahl: '-124'
+Befehl: 'E1586'
+Wort: 'Wort'
+
+Repräsentation von Zahlen
+Repräsentation von Buchstaben
+Repräsentation von Befehlen
+
+alles 38 bits (38-stellige Binärzahlen)
+
+jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextzeichen
+
+00 negative Zahl
+11 positive Zahl
+01 Buchstaben
+10 Befehle
 """
 
 
 class Wort:
     def __init__(self, zelle, strWort):
         self.zelle = zelle
-        self.strWort = strWort
+        self.strWort = strWort.strip()
 
     def parse(self):
-        pass
+        """
+        Prüfen, um welchen Untertyp es sich handelt und ein Objekt des entsprechenden Typs erstellen
+        :return: Objekt des jeweiligen Typs
+        """
+        obj = None
+        wort = self.strWort
+        # check Strichzahl
+        if wort[-1] == '\'':
+            obj = Ganzzahl(self.zelle, self.strWort)
+        # check Klartext (lexikalisches Wort)
+        elif not bool(re.search(r'\d', wort)) and wort != 'D':
+            obj = Klartext(self.zelle, self.strWort)
+        # check Befehl
+        elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
+            obj = Befehl(self.zelle, self.strWort)
+        else:
+            print('Objekttyp konnte nicht identifiziert werden')
+            print('Inputstring checken')
+        return obj
 
     def getBinary(self):
+        # nur in Unterklassen implementieren?
         pass
 
 
@@ -42,12 +86,16 @@ class Befehl(Wort):
     def getAddons(self):
         pass
 
+    def getBinary(self):
+        pass
+
 
 class Klartext(Wort):
     def __init__(self, zelle, strWort):
         super().__init__(zelle, strWort)
 
     def getBinary(self):
+        # Buchstaben beginnen mit [0,1] (Typ)
         pass
 
 
@@ -59,3 +107,14 @@ class Ganzzahl(Wort):
         pass
 
 
+if __name__ == '__main__':
+    w1 = Wort(1, 'EZ0+1E')
+    w2 = Wort(2, 'A0')
+    w3 = Wort(3, 'D')
+    w4 = Wort(4, 'GROSS')
+    w5 = Wort(5, '2\'')
+    print('Typ von String {} ist {}'.format(w1.strWort, type(w1.parse())))
+    print('Typ von String {} ist {}'.format(w2.strWort, type(w2.parse())))
+    print('Typ von String {} ist {}'.format(w3.strWort, type(w3.parse())))
+    print('Typ von String {} ist {}'.format(w4.strWort, type(w4.parse())))
+    print('Typ von String {} ist {}'.format(w5.strWort, type(w5.parse())))
