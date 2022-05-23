@@ -1,4 +1,3 @@
-import numpy as np
 import re
 
 class CPU:
@@ -32,7 +31,7 @@ class CPU:
     self._log("CPU executes step ", self.currentStep)
     self._log("CPU status: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
       
-    
+    # 1. Parse the command (to be replaced by other code)
     # if its a 0 or "0", we set befehl and address to 0
     try: 
       befehl, address = self._parseCommand(self.b)
@@ -84,10 +83,11 @@ class CPU:
     elif befehl == "DX":
       self.printMemory(address)
     
-    # ... and put the command for getting the next command into the Befehlsregister
+    # 3. ... and put the command for getting the next command into the Befehlsregister
     self.b = self.c
     self.currentStep += 1
-     
+    
+    # finally, some logging
     self._log("CPU status after: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
     self._log("Done with step ", self.currentStep)
   
@@ -102,7 +102,7 @@ class CPU:
       raise SyntaxError("Parse Error: " + str(self.b))
     return (m.group(1), int(m.group(2)) if m.group(2) else None)
     
-  def printMemory(self, cell=None):
+  def printMemory(self, cell = None):
     """Print a simple image of the entire memory or a single block """
     if cell:
       print((cell, self.memory[cell]))
@@ -140,9 +140,8 @@ class CPU:
 
 
 if __name__=="__main__":
-  mem1 = [0 for x in range(0,130)] # np.zeros(130, dtype="S10")
+  mem1 = [0 for x in range(0,130)]
   mem1[100:113] = ["B5", "T112", "B113", "LLA0", "LLA0", "A113", "RA0", "RA0", "RA0", "RA0", "U113", "CI15", 0, 12345678, "B0+1900", "B0+1950", "B1982", 0, 0, 0, "F100", "D", "DX113", "E120"]
-  # mem1[5] = "E121"
   cpu = CPU(mem1, verbose=False, interactive=False)
   cpu.printMemory()
-  cpu.startAt(120, maxSteps=1)
+  cpu.startAt(120, maxSteps=1000)
