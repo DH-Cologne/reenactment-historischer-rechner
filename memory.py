@@ -68,13 +68,13 @@ class Memory:
         self.akkumulator = {'4': np.zeros(38, dtype=np.int8)}
         pass
 
-    def set(self, int: zelle, str: word) -> bool:
+    def set(self, zelle, strWort) -> bool:
         """ """
         # wert kann binaerzahl oder string sein
-        binaerhandling.encode(word)
+        # binaerhandling.encode(word)
         pass
 
-    def get(self, int: zelle, binary=False) -> str:
+    def get(self, zelle, binary=False) -> str:
         """ """
         pass
 
