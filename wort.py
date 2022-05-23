@@ -66,6 +66,7 @@ class Wort:
         # check Befehl
         elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
             obj = Befehl(self.zelle, self.strWort)
+        # sonst fehlerhafter Input
         else:
             print('Objekttyp konnte nicht identifiziert werden')
             print('Inputstring checken')
