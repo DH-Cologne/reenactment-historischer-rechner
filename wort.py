@@ -1,5 +1,8 @@
+from io import StringIO
+
 import numpy as np
 import re
+from baudot import encode_str, codecs, handlers
 
 """
 Notizen aus Stunde am 03.05.2022
@@ -48,7 +51,7 @@ jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextze
 class Wort:
     def __init__(self, zelle, strWort):
         self.zelle = zelle
-        self.strWort = strWort.strip()
+        self.strWort = strWort
 
     def parse(self):
         """
@@ -96,8 +99,42 @@ class Klartext(Wort):
         super().__init__(zelle, strWort)
 
     def getBinary(self):
+        """
+        Binärzahl aus String erstellen
+        :return: 38-stellige Binärzahl als Liste
+        """
         # Buchstaben beginnen mit [0,1] (Typ)
-        pass
+        wort = self.strWort
+        # drittes Element 0?
+        binary = [0, 1, 0]
+        while len(wort) < 7:
+            wort += ' '
+        print(wort)
+        # baudot encodieren des Wortes
+        encodedWort = baudot_encode(wort)
+        binary = binary + encodedWort
+        print(binary)
+        print(len(binary))
+        return binary
+
+
+def baudot_encode(wort):
+    """
+    String Wort als Baudot Code encodieren
+    :param wort: Input Wort als String
+    :return: baudot-encodiertes Wort
+    """
+    with StringIO() as output_buffer:
+        writer = handlers.TapeWriter(output_buffer)
+        encode_str(wort, codecs.ITA2_STANDARD, writer)
+        output = output_buffer.getvalue()
+    output = output.replace('.', '').replace('*', '1').replace(' ', '0')
+    output_list = output.split('\n')[1:-1]
+    # reverse strings
+    output_list = [x[len(x)::-1] for x in output_list]
+    output_list = list(''.join(output_list))
+    return output_list
+
 
 
 class Ganzzahl(Wort):
@@ -119,3 +156,6 @@ if __name__ == '__main__':
     print('Typ von String {} ist {}'.format(w3.strWort, type(w3.parse())))
     print('Typ von String {} ist {}'.format(w4.strWort, type(w4.parse())))
     print('Typ von String {} ist {}'.format(w5.strWort, type(w5.parse())))
+
+    klartext = w4.parse()
+    klartext.getBinary()
