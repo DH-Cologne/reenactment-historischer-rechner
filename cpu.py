@@ -92,10 +92,10 @@ class CPU:
     self._log("Done with step ", self.currentStep)
   
   def _parseCommand(self, commandString):
-  """
-  Parse the command and return a pair of Befehl and Address. 
-  Address can be None, e.g., for the command "D"
-  """
+    """
+    Parse the command and return a pair of Befehl and Address. 
+    Address can be None, e.g., for the command "D"
+    """
     pattern = re.compile(r"^([A-Z]+)(\d+)?$")
     m = pattern.match(str(self.b))
     if not m: 
@@ -103,19 +103,19 @@ class CPU:
     return (m.group(1), int(m.group(2)) if m.group(2) else None)
     
   def printMemory(self, cell=None):
-  """Print a simple image of the entire memory or a single block """
+    """Print a simple image of the entire memory or a single block """
     if cell:
       print((cell, self.memory[cell]))
     else:
       print([(index, value) for index, value in enumerate(self.memory) ])
     
   def _log(self, *msg):
-  """Log a message, if verbosity is turned on in the object"""
+    """Log a message, if verbosity is turned on in the object"""
     if self.verbose:
       print("".join([str(x) for x in msg]))
     
   def _a(self, value = None):
-  """ Easier set and get access to the accumulator """
+    """ Easier set and get access to the accumulator """
     if value:
       self.memory[4] = value
     else:
@@ -145,4 +145,4 @@ if __name__=="__main__":
   # mem1[5] = "E121"
   cpu = CPU(mem1, verbose=False, interactive=False)
   cpu.printMemory()
-  cpu.startAt(120, maxSteps=1000)
+  cpu.startAt(120, maxSteps=1)
