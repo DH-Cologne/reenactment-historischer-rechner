@@ -1,7 +1,4 @@
 import numpy as np
-# https://python-baudot.readthedocs.io/en/latest/reference.html#baudot.codecs.BaudotCodec
-from baudot import encode_str, codecs, handlers
-from io import StringIO
 
 
 # Frage: Trommelspeicher mit 8192 speicherzellen für je 1 Wort: Notwendig für unsere Implementierung,
@@ -68,54 +65,17 @@ class Memory:
         self.akkumulator = {'4': np.zeros(38, dtype=np.int8)}
         pass
 
-    def set(self, zelle, strWort) -> bool:
+    def set(self, int: zelle, str: word) -> bool:
         """ """
-        # wert kann binaerzahl oder string sein
-        # binaerhandling.encode(word)
         pass
 
-    def get(self, zelle, binary=False) -> str:
+    def get(self, int: zelle, binary=False) -> str:
         """ """
         pass
 
     def getAll(self) -> dict:
         """ """
         pass
-
-
-def _encode(input: str) -> list:
-    # Repräsentation von Daten
-    # 1. und 2. Bit: Type
-    # 3. Bit 0 oder 1? Umschalter zwischen Zahlen und Buchstaben?
-    # 7 Zeichen a 5 bits
-
-    # Zahl: '-124'
-    # Befehl: 'E1586'
-    # Wort: 'Wort'
-
-    # Repräsentation von Zahlen
-    # Repräsentation von Buchstaben
-    # Repräsentation von Befehlen
-
-    # alles 38 bits (38-stellige Binärzahlen)
-
-    # jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextzeichen
-
-    # 00 negative Zahl
-    # 11 positive Zahl
-    # 01 Buchstaben
-    # 10 Befehle
-
-    input_str = ' '
-    with StringIO() as output_buffer:
-        writer = handlers.TapeWriter(output_buffer)
-        encode_str(input_str, codecs.ITA2_STANDARD, writer)
-        print(output_buffer.getvalue())
-    pass
-
-
-def _decode(input: list) -> str:
-    pass
 
 
 if __name__ == '__main__':

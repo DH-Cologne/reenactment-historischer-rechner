@@ -1,5 +1,8 @@
 import numpy as np
 import re
+# https://python-baudot.readthedocs.io/en/latest/reference.html#baudot.codecs.BaudotCodec
+from baudot import encode_str, codecs, handlers
+from io import StringIO
 
 """
 Notizen aus Stunde am 03.05.2022
@@ -59,7 +62,7 @@ class Wort:
         wort = self.strWort
         # check Strichzahl
         if wort[-1] == '\'':
-            obj = Ganzzahl(self.zelle, self.strWort)
+            obj = Ganzzahl(self.zelle, self.strWort[0:-1])
         # check Klartext (lexikalisches Wort)
         elif not bool(re.search(r'\d', wort)) and wort != 'D':
             obj = Klartext(self.zelle, self.strWort)
@@ -78,6 +81,9 @@ class Wort:
 
 
 class Befehl(Wort):
+
+    # benötigen wir den Schnellspeicher?
+
     def __init__(self, zelle, strWort):
         super().__init__(zelle, strWort)
 
@@ -92,11 +98,28 @@ class Befehl(Wort):
 
 
 class Klartext(Wort):
+
     def __init__(self, zelle, strWort):
         super().__init__(zelle, strWort)
 
     def getBinary(self):
         # Buchstaben beginnen mit [0,1] (Typ)
+        # Frage: Umschalten relevant für uns?
+        # Frage: Wie Leerzeichen sinnvoll einsetzen? Wenn Wort weniger als 7 Zeichen, dass Rest mit Leerzeichen auffüllen?
+
+        print(self.strWort)
+        if len(self.strWort) > 7:
+            raise Exception(f"Klartext {self.strWort} is out of bound.")
+
+        with StringIO() as output_buffer:
+            writer = handlers.TapeWriter(output_buffer)
+            encode_str(self.strWort, codecs.ITA2_STANDARD, writer)
+            output = output_buffer.getvalue()
+
+        print(output)
+        print(type(output))
+        print(output.split("\n")[1:])
+
         pass
 
 
@@ -105,17 +128,49 @@ class Ganzzahl(Wort):
         super().__init__(zelle, strWort)
 
     def getBinary(self):
-        pass
+
+        # does not include handling of float humbers
+        float_rep = float(self.strWort)
+        if abs(float_rep) > (2**35) - 1:
+            raise Exception(f"Strichzahl {float_rep} is out of bound.")
+
+        bin_number = list(bin(int(self.strWort)).split("b")[1].strip(" "))
+
+        while len(bin_number) < 35:
+            bin_number.insert(0, 0)
+
+        if float_rep > 0:
+            if float_rep % 1 == 0.0:
+                bin_number.insert(0, 0)
+            else:
+                bin_number.insert(0, 1)
+            bin_number.insert(0, 0)
+            bin_number.insert(0, 0)
+
+        if float_rep < 0:
+            if float_rep % 1 == 0.0:
+                bin_number.insert(0, 1)
+            else:
+                bin_number.insert(0, 0)
+            bin_number.insert(0, 1)
+            bin_number.insert(0, 1)
+
+        bin_number = [int(item) for item in bin_number]
+
+        return bin_number
 
 
 if __name__ == '__main__':
     w1 = Wort(1, 'EZ0+1E')
     w2 = Wort(2, 'A0')
     w3 = Wort(3, 'D')
-    w4 = Wort(4, 'GROSS')
+    w4 = Wort(4, 'SCHLOS ')
     w5 = Wort(5, '2\'')
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1.parse())))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2.parse())))
     print('Typ von String {} ist {}'.format(w3.strWort, type(w3.parse())))
     print('Typ von String {} ist {}'.format(w4.strWort, type(w4.parse())))
     print('Typ von String {} ist {}'.format(w5.strWort, type(w5.parse())))
+
+    print(w5.parse().getBinary())
+    print(w4.parse().getBinary())
