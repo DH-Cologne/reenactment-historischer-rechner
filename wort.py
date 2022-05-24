@@ -98,29 +98,45 @@ class Befehl(Wort):
 
 
 class Klartext(Wort):
-
     def __init__(self, zelle, strWort):
         super().__init__(zelle, strWort)
 
     def getBinary(self):
+        """
+        Binärzahl aus String erstellen
+        :return: 38-stellige Binärzahl als Liste
+        """
         # Buchstaben beginnen mit [0,1] (Typ)
-        # Frage: Umschalten relevant für uns?
-        # Frage: Wie Leerzeichen sinnvoll einsetzen? Wenn Wort weniger als 7 Zeichen, dass Rest mit Leerzeichen auffüllen?
+        wort = self.strWort
+        # drittes Element 0?
+        binary = [0, 1, 0]
+        while len(wort) < 7:
+            wort += ' '
+        print(wort)
+        # baudot encodieren des Wortes
+        encodedWort = baudot_encode(wort)
+        binary = binary + encodedWort
+        print(binary)
+        print(len(binary))
+        return binary
 
-        print(self.strWort)
-        if len(self.strWort) > 7:
-            raise Exception(f"Klartext {self.strWort} is out of bound.")
 
-        with StringIO() as output_buffer:
-            writer = handlers.TapeWriter(output_buffer)
-            encode_str(self.strWort, codecs.ITA2_STANDARD, writer)
-            output = output_buffer.getvalue()
-
-        print(output)
-        print(type(output))
-        print(output.split("\n")[1:])
-
-        pass
+def baudot_encode(wort):
+    """
+    String Wort als Baudot Code encodieren
+    :param wort: Input Wort als String
+    :return: baudot-encodiertes Wort
+    """
+    with StringIO() as output_buffer:
+        writer = handlers.TapeWriter(output_buffer)
+        encode_str(wort, codecs.ITA2_STANDARD, writer)
+        output = output_buffer.getvalue()
+    output = output.replace('.', '').replace('*', '1').replace(' ', '0')
+    output_list = output.split('\n')[1:-1]
+    # reverse strings
+    output_list = [x[len(x)::-1] for x in output_list]
+    output_list = list(''.join(output_list))
+    return output_list
 
 
 class Ganzzahl(Wort):
