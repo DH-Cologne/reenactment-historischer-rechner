@@ -50,12 +50,13 @@ class CPU:
       self.b = self.memory[address]
       self.c = "E" + str(address+1)
       
-      self._log("CPU status before: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
+      self._log("CPU status after: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
       self._log("Done with step ", self.currentStep)
       self.currentStep += 1
       return
     # D
     elif befehl == "D":
+      # io.print()
       print(self._a())
     # B
     elif befehl == "B":
@@ -65,9 +66,6 @@ class CPU:
       self.memory[address] = self._a()
       if befehl == "T":
         self._a(0)
-    # 0
-    elif befehl == "0":
-      pass
     # LLA
     elif befehl == "LLA":
       self._a((self._a() << 2) + self.memory[address])
