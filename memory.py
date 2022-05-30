@@ -57,28 +57,46 @@ class Memory:
     # 16: Die Speicherzelle 16 ist mit Zelle 5 identisch, kann unter der Adresse 16 aber nur gelesen werden.
 
     memory = {}
-    zero = {'0': np.zeros(38, dtype=np.int8)}
-    akkumulator = {'4': np.zeros(38, dtype=np.int8)}
+    zero = {0: np.zeros(38, dtype=np.int8)}
+    akkumulator = {4: np.zeros(38, dtype=np.int8)}
 
     def __init__(self):
         """ """
         self.memory = {}
-        self.zero = {'0': np.zeros(38, dtype=np.int8)}
-        self.akkumulator = {'4': np.zeros(38, dtype=np.int8)}
+        self.zero = {0: np.zeros(38, dtype=np.int8)}
+        self.akkumulator = {4: np.zeros(38, dtype=np.int8)}
+
+        self.memory.update(self.zero)
+        self.memory.update(self.akkumulator)
+
+    def set(self, zelle: int, word: str) -> bool:
+        """ """
+        if zelle in list(self.memory.keys()):
+            self.memory[zelle] = word
+        else:
+            self.memory.update({zelle: word})
         pass
 
-    def set(self, int: zelle, str: word) -> bool:
+    def get(self, zelle: int, binary=False) -> str:
         """ """
-        pass
-
-    def get(self, int: zelle, binary=False) -> str:
-        """ """
-        pass
+        if zelle not in list(self.memory.keys()):
+            raise Exception(f"Cell address {zelle} is empty.")
+        else:
+            return self.memory[zelle]
 
     def getAll(self) -> dict:
         """ """
-        pass
+        return self.memory
 
 
 if __name__ == '__main__':
-    pass
+    speicher = Memory()
+    speicher.set(8, np.zeros(38, dtype=np.int8))
+    speicher.set(9, np.zeros(38, dtype=np.int8))
+    speicher.set(4, "Akkumulator")
+
+    print(speicher.get(8))
+    print(speicher.get(4))
+    print(speicher.get(0))
+
+    print(speicher.get(10))
