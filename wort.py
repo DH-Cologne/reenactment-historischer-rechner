@@ -77,8 +77,8 @@ class Wort:
 
 class Befehl(Wort):
 
-    def __init__(self, zelle, strWort):
-        super().__init__(zelle, strWort)
+    def __init__(self, strWort):
+        super().__init__(strWort)
         self.isArithmetic = False
         self.isJumpOrCall = False
         self.isCondition = False
@@ -248,13 +248,13 @@ class Klartext(Wort):
             wort += ' '
         print(wort)
         # baudot encodieren des Wortes
-        encodedWort = baudot_encode(wort)
+        encodedWort = self._baudot_encode(wort)
         binary = binary + encodedWort
         print(binary)
         print(len(binary))
         return binary
 
-    def _baudot_encode(wort):
+    def _baudot_encode(self, wort):
         """
         String Wort als Baudot Code encodieren
         :param wort: Input Wort als String
@@ -273,12 +273,12 @@ class Klartext(Wort):
 
 
 class Ganzzahl(Wort):
+
     def __init__(self, strWort):
         super().__init__(strWort)
-
-        float_rep = float(self.strWort)
-        if abs(float_rep) > (2 ** 35) - 1 or float_rep % 1 != 0.0:
-            raise Exception(f"Strichzahl {float_rep} is out of bound.")
+        self.float_rep = float(self.strWort)
+        if abs(self.float_rep) > (2 ** 35) - 1 or self.float_rep % 1 != 0.0:
+            raise Exception(f"Strichzahl {self.float_rep} is out of bound.")
 
     def getBinary(self):
 
@@ -287,9 +287,9 @@ class Ganzzahl(Wort):
         while len(bin_number) < 35:
             bin_number.insert(0, 0)
 
-        if float_rep >= 0:
+        if self.float_rep >= 0:
             bin_number = [0, 0, 0] + bin_number
-        if float_rep < 0:
+        if self.float_rep < 0:
             bin_number = [1, 1, 1] + bin_number
 
         bin_number = [int(item) for item in bin_number]
@@ -301,13 +301,13 @@ class Ganzzahl(Wort):
 
 
 if __name__ == '__main__':
-    w1 = Wort(1, 'EZ0+1E')
-    w2 = Wort(2, 'A0')
-    w3 = Wort(3, 'D')
-    w4 = Wort(4, 'SCHLOS ')
-    w5 = Wort(5, '2\'')
-    w6 = Wort(6, 'B0+1900')
-    w7 = Wort(7, 'E1720E')
+    w1 = Wort('EZ0+1E')
+    w2 = Wort('A0')
+    w3 = Wort('D')
+    w4 = Wort('SCHLOS ')
+    w5 = Wort('2\'')
+    w6 = Wort('B0+1900')
+    w7 = Wort('E1720E')
 
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1.parse())))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2.parse())))
@@ -318,8 +318,8 @@ if __name__ == '__main__':
 
     print(w5.parse().getBinary())
     print(w4.parse().getBinary())
-    # print(w1.parse().getBinary())
-    # print(w6.parse().getBinary())
+    print(w1.parse().getBinary())
+    print(w6.parse().getBinary())
     print(w2.parse().getBinary())
     print(w3.parse().getBinary())
     print(w7.parse().getBinary())
