@@ -5,11 +5,13 @@ import numpy as np
 # die obere Grenze festzulegen?
 
 class Memory:
-    """▶ Speicher: 38-stellige Binärzahlen (= 1 ‚Wort‘)
+    """
+    ▶ Speicher: 38-stellige Binärzahlen (= 1 ‚Wort‘)
     ▶ Trommelspeicher: 8192 Speicherzellen für je 1 Wort (= 38.9 kB)
     ▶ Mittlere Zugriffszeit: 5 msec
     ▶ 256 mit je 32 Sektoren = 8192 = 213
-    ▶ Schnellspeicher: 14 Zellen (Z22R: 25) „Ohne Zugriffszeit“ ▶ Adressen 0–31: Schnellspeicheradressen;
+    ▶ Schnellspeicher: 14 Zellen (Z22R: 25) „Ohne Zugriffszeit“
+    ▶ Adressen 0–31: Schnellspeicheradressen;
     4: Akkumulator"""
 
     """Interne Darstellung als 38-bit-Wort:

@@ -49,8 +49,7 @@ jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextze
 
 
 class Wort:
-    def __init__(self, zelle, strWort):
-        self.zelle = zelle
+    def __init__(self, strWort):
         self.strWort = strWort.strip()
 
     def parse(self):
@@ -62,22 +61,18 @@ class Wort:
         wort = self.strWort
         # check Strichzahl
         if wort[-1] == '\'':
-            obj = Ganzzahl(self.zelle, self.strWort[0:-1])
+            obj = Ganzzahl(self.strWort[0:-1])
         # check Klartext (lexikalisches Wort)
         elif not bool(re.search(r'\d', wort)) and wort != 'D':
-            obj = Klartext(self.zelle, self.strWort)
+            obj = Klartext(self.strWort)
         # check Befehl
         elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
-            obj = Befehl(self.zelle, self.strWort)
+            obj = Befehl(self.strWort)
         # sonst fehlerhafter Input
         else:
             print('Objekttyp konnte nicht identifiziert werden')
             print('Inputstring checken')
         return obj
-
-    def getBinary(self):
-        # nur in Unterklassen implementieren?
-        pass
 
 
 class Befehl(Wort):
@@ -237,8 +232,8 @@ class Befehl(Wort):
 
 
 class Klartext(Wort):
-    def __init__(self, zelle, strWort):
-        super().__init__(zelle, strWort)
+    def __init__(self, strWort):
+        super().__init__(strWort)
 
     def getBinary(self):
         """
@@ -259,60 +254,50 @@ class Klartext(Wort):
         print(len(binary))
         return binary
 
-
-def baudot_encode(wort):
-    """
-    String Wort als Baudot Code encodieren
-    :param wort: Input Wort als String
-    :return: baudot-encodiertes Wort
-    """
-    with StringIO() as output_buffer:
-        writer = handlers.TapeWriter(output_buffer)
-        encode_str(wort, codecs.ITA2_STANDARD, writer)
-        output = output_buffer.getvalue()
-    output = output.replace('.', '').replace('*', '1').replace(' ', '0')
-    output_list = output.split('\n')[1:-1]
-    # reverse strings
-    output_list = [x[len(x)::-1] for x in output_list]
-    output_list = list(''.join(output_list))
-    return output_list
+    def _baudot_encode(wort):
+        """
+        String Wort als Baudot Code encodieren
+        :param wort: Input Wort als String
+        :return: baudot-encodiertes Wort
+        """
+        with StringIO() as output_buffer:
+            writer = handlers.TapeWriter(output_buffer)
+            encode_str(wort, codecs.ITA2_STANDARD, writer)
+            output = output_buffer.getvalue()
+        output = output.replace('.', '').replace('*', '1').replace(' ', '0')
+        output_list = output.split('\n')[1:-1]
+        # reverse strings
+        output_list = [x[len(x)::-1] for x in output_list]
+        output_list = list(''.join(output_list))
+        return output_list
 
 
 class Ganzzahl(Wort):
-    def __init__(self, zelle, strWort):
-        super().__init__(zelle, strWort)
+    def __init__(self, strWort):
+        super().__init__(strWort)
+
+        float_rep = float(self.strWort)
+        if abs(float_rep) > (2 ** 35) - 1 or float_rep % 1 != 0.0:
+            raise Exception(f"Strichzahl {float_rep} is out of bound.")
 
     def getBinary(self):
-
-        # does not include handling of float humbers
-        float_rep = float(self.strWort)
-        if abs(float_rep) > (2 ** 35) - 1:
-            raise Exception(f"Strichzahl {float_rep} is out of bound.")
 
         bin_number = list(bin(int(self.strWort)).split("b")[1].strip(" "))
 
         while len(bin_number) < 35:
             bin_number.insert(0, 0)
 
-        if float_rep > 0:
-            if float_rep % 1 == 0.0:
-                bin_number.insert(0, 0)
-            else:
-                bin_number.insert(0, 1)
-            bin_number.insert(0, 0)
-            bin_number.insert(0, 0)
-
+        if float_rep >= 0:
+            bin_number = [0, 0, 0] + bin_number
         if float_rep < 0:
-            if float_rep % 1 == 0.0:
-                bin_number.insert(0, 1)
-            else:
-                bin_number.insert(0, 0)
-            bin_number.insert(0, 1)
-            bin_number.insert(0, 1)
+            bin_number = [1, 1, 1] + bin_number
 
         bin_number = [int(item) for item in bin_number]
 
         return bin_number
+
+    def getInt(self):
+        return int(strWort)
 
 
 if __name__ == '__main__':
