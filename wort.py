@@ -70,8 +70,7 @@ class Wort:
             obj = Befehl(self.strWort)
         # sonst fehlerhafter Input
         else:
-            print('Objekttyp konnte nicht identifiziert werden')
-            print('Inputstring checken')
+            raise Exception(f"Objekttyp für Input {wort} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
         return obj
 
 
@@ -84,10 +83,6 @@ class Befehl(Wort):
         self.isCondition = False
         self.isStop = False
         self.isShift = False
-
-    def getAddons(self):
-        # Was ist hiermit gemeint?
-        pass
 
     def getBinary(self):
         """
@@ -234,42 +229,45 @@ class Befehl(Wort):
 class Klartext(Wort):
     def __init__(self, strWort):
         super().__init__(strWort)
+        if len(strWort) > 6:
+            raise Exception(f"Wort {strWort} überschreitet die maximale Länge von 6 Zeichen")
 
     def getBinary(self):
         """
         Binärzahl aus String erstellen
         :return: 38-stellige Binärzahl als Liste
         """
-        # Buchstaben beginnen mit [0,1] (Typ)
         wort = self.strWort
-        # drittes Element 0?
-        binary = [0, 1, 0]
-        while len(wort) < 7:
-            wort += ' '
-        print(wort)
+        # Vektor initialisieren, Klartext Typ beginnt mit [0, 1]
+        binary = np.zeros(38, dtype=int)
+        binary[1] = 1
+        # Umschalter Bit ändern nur bei Punkt
+        if wort == '.':
+            binary[2] = 1
+        # 1 Leerzeichen anhängen
+        wort += ' '
         # baudot encodieren des Wortes
-        encodedWort = self._baudot_encode(wort)
-        binary = binary + encodedWort
-        print(binary)
-        print(len(binary))
-        return binary
+        baudot_wort = self._baudot_encode(wort)
+        # Entsprechende Bits auf 1 setzen
+        for i in range(len(baudot_wort)):
+            if baudot_wort[i] == '*':
+                binary[i+3] = 1
+        return list(binary)
 
     def _baudot_encode(self, wort):
         """
         String Wort als Baudot Code encodieren
         :param wort: Input Wort als String
-        :return: baudot-encodiertes Wort
+        :return: baudot-encodiertes Wort als Zeichenkette aus * und . für 1 und 0
         """
         with StringIO() as output_buffer:
             writer = handlers.TapeWriter(output_buffer)
             encode_str(wort, codecs.ITA2_STANDARD, writer)
             output = output_buffer.getvalue()
-        output = output.replace('.', '').replace('*', '1').replace(' ', '0')
-        output_list = output.split('\n')[1:-1]
-        # reverse strings
-        output_list = [x[len(x)::-1] for x in output_list]
-        output_list = list(''.join(output_list))
-        return output_list
+        baudot_string = output.replace('.', '').replace('\n', '').replace(' ', '.')
+        # Automatisch hinzugefügtes Anfangszeichen abschneiden
+        baudot_string = baudot_string[5:]
+        return baudot_string
 
 
 class Ganzzahl(Wort):
@@ -297,14 +295,14 @@ class Ganzzahl(Wort):
         return bin_number
 
     def getInt(self):
-        return int(strWort)
+        return int(self.strWort)
 
 
 if __name__ == '__main__':
     w1 = Wort('EZ0+1E')
     w2 = Wort('A0')
     w3 = Wort('D')
-    w4 = Wort('SCHLOS ')
+    w4 = Wort('SCHLOS')
     w5 = Wort('2\'')
     w6 = Wort('B0+1900')
     w7 = Wort('E1720E')
@@ -323,3 +321,4 @@ if __name__ == '__main__':
     print(w2.parse().getBinary())
     print(w3.parse().getBinary())
     print(w7.parse().getBinary())
+
