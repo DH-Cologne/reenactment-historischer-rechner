@@ -44,42 +44,45 @@ class CPU:
     ## 2. Now we have parsed, we execute the commands.
     
     # Sprungbefehle E and F
-    if befehl == "E" or befehl == "F":
-      if befehl == "F":
-        self.memory[5] = self.c
-      self.b = self.memory[address]
-      self.c = "E" + str(address+1)
+    if self._applyConditions(befehl):
+      if befehl == "E" or befehl == "F":
+        if befehl == "F":
+          self.memory[5] = self.c
+        self.b = self.memory[address]
+        self.c = "E" + str(address+1)
       
-      self._log("CPU status after: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
-      self._log("Done with step ", self.currentStep)
-      self.currentStep += 1
-      return
-    # D
-    elif befehl == "D":
-      # io.print()
-      print(self._a())
-    # B
-    elif befehl == "B":
-      self._a(self.memory[address])
-    # T and U
-    elif befehl == "T" or befehl == "U":
-      self.memory[address] = self._a()
-      if befehl == "T":
-        self._a(0)
-    # LLA
-    elif befehl == "LLA":
-      self._a((self._a() << 2) + self.memory[address])
-    # A
-    elif befehl == "A":
-      self._a(self._a() + self.memory[address])
-    # RA
-    elif befehl == "RA":
-      self._a((self._a() >> 1) + self.memory[address])
-    # CI
-    elif befehl == "CI":
-      self._a(self._a() & address)
-    elif befehl == "DX":
-      self.printMemory(address)
+        self._log("CPU status after: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
+        self._log("Done with step ", self.currentStep)
+        self.currentStep += 1
+        return
+      # D
+      elif befehl == "D":
+        # io.print()
+        print(self._a())
+      # B
+      elif befehl == "B":
+        self._a(self.memory[address])
+      # T and U
+      elif befehl == "T" or befehl == "U":
+        self.memory[address] = self._a()
+        if befehl == "T":
+          self._a(0)
+      # LLA
+      elif befehl == "LLA":
+        self._a((self._a() << 2) + self.memory[address])
+      # A
+      elif befehl == "A":
+        self._a(self._a() + self.memory[address])
+      # RA
+      elif befehl == "RA":
+        self._a((self._a() >> 1) + self.memory[address])
+      # CI
+      elif befehl == "CI":
+        self._a(self._a() & address)
+      elif befehl == "DX":
+        self.printMemory(address)
+    else:
+      self._log("Condition not fulfilled.")
     
     # 3. ... and put the command for getting the next command into the Befehlsregister
     self.b = self.c
@@ -88,6 +91,21 @@ class CPU:
     # finally, some logging
     self._log("CPU status after: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
     self._log("Done with step ", self.currentStep)
+  
+  def _applyConditions(self, befehl) -> bool:
+    if "PPQQ" in befehl:
+      return self._a() == 0 
+    if "PP" in befehl:
+      return self._a() > 0
+    if "QQ" in befehl:
+      return self._a() < 0
+    if "P" in befehl:
+      return self.memory[2] >= 0
+    if "Q" in befehl:
+      return self.memory[2] < 0
+    if "Y" in befehl:
+      return bin(self.memory[3])[-1] == "1"
+    return True
   
   def _parseCommand(self, commandString):
     """
