@@ -49,7 +49,7 @@ jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextze
 
 
 class Wort:
-    def __init__(self, strWort):
+    def __init__(self, strWort: str):
         self.strWort = strWort.strip()
 
     def parse(self):
@@ -76,7 +76,7 @@ class Wort:
 
 class Befehl(Wort):
 
-    def __init__(self, strWort):
+    def __init__(self, strWort: str):
         super().__init__(strWort)
         self.isArithmetic = False
         self.isJumpOrCall = False
@@ -84,7 +84,7 @@ class Befehl(Wort):
         self.isStop = False
         self.isShift = False
 
-    def getBinary(self):
+    def getBinary(self) -> list:
         """
         Umwandlung eines Befehls als String in eine Binärzahl.
         :return: Befehl als Binärzahl
@@ -113,7 +113,7 @@ class Befehl(Wort):
         binary += operation + speicher
         return binary
 
-    def encode_operation(self, operation_list):
+    def encode_operation(self, operation_list: list) -> list:
         """
         String Befehl wird zu 18-stelliger Binärzahl umgewandelt.
         :param operation_list Liste mit allen genannten Operationen einer Speicherzelle
@@ -180,7 +180,7 @@ class Befehl(Wort):
 
         return operation
 
-    def encode_address(self, address_list):
+    def encode_address(self, address_list: list):
         """
            String Speicheradresse wird zu 18-stelliger Binärzahl umgewandelt.
            Unterteilung des Schnell- (5-stellig) und Trommelspeichers (13-stellig).
@@ -227,12 +227,12 @@ class Befehl(Wort):
 
 
 class Klartext(Wort):
-    def __init__(self, strWort):
+    def __init__(self, strWort: str):
         super().__init__(strWort)
         if len(strWort) > 6:
             raise Exception(f"Wort {strWort} überschreitet die maximale Länge von 6 Zeichen")
 
-    def getBinary(self):
+    def getBinary(self) -> list:
         """
         Binärzahl aus String erstellen
         :return: 38-stellige Binärzahl als Liste
@@ -254,7 +254,7 @@ class Klartext(Wort):
                 binary[i+3] = 1
         return list(binary)
 
-    def _baudot_encode(self, wort):
+    def _baudot_encode(self, wort: str) -> str:
         """
         String Wort als Baudot Code encodieren
         :param wort: Input Wort als String
@@ -272,13 +272,13 @@ class Klartext(Wort):
 
 class Ganzzahl(Wort):
 
-    def __init__(self, strWort):
+    def __init__(self, strWort: str):
         super().__init__(strWort)
         self.float_rep = float(self.strWort)
         if abs(self.float_rep) > (2 ** 35) - 1 or self.float_rep % 1 != 0.0:
             raise Exception(f"Strichzahl {self.float_rep} is out of bound.")
 
-    def getBinary(self):
+    def getBinary(self) -> list:
 
         bin_number = list(bin(int(self.strWort)).split("b")[1].strip(" "))
 
@@ -294,7 +294,7 @@ class Ganzzahl(Wort):
 
         return bin_number
 
-    def getInt(self):
+    def getInt(self) -> int:
         return int(self.strWort)
 
 
