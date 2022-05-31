@@ -33,10 +33,11 @@ class CPU:
     
     if a != None:
       self._a(a)
-    if b != None: 
+    if b != None:
       self.b = b
     if c != None:
       self.c = c
+
     # 1. Parse the command (to be replaced by other code)
     # if its a 0 or "0", we set befehl and address to 0
     try: 
