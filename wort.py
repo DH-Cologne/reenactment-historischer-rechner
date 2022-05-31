@@ -41,8 +41,8 @@ alles 38 bits (38-stellige Binärzahlen)
 
 jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextzeichen
 
-00 negative Zahl
-11 positive Zahl
+11 negative Zahl
+00 positive Zahl
 01 Buchstaben
 10 Befehle
 """
@@ -57,7 +57,7 @@ def parse(strWort):
     obj = None
     wort = strWort
     # check Strichzahl
-    if wort[-1] == '\'':
+    if wort[-1] == '\'' or wort == '0':
         obj = Ganzzahl(strWort[0:-1])
     # check Klartext (lexikalisches Wort)
     elif not bool(re.search(r'\d', wort)) and wort != 'D':
