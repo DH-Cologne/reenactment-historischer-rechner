@@ -87,6 +87,7 @@ class Befehl(Wort):
         self.isCondition = False
         self.isStop = False
         self.isShift = False
+        self.isReadOrSave = False
 
     def getBinary(self) -> list:
         """
@@ -108,10 +109,17 @@ class Befehl(Wort):
         if match:
             items = match.groups()
             items = [i for i in items if i is not None]
+            operations = [i for i in items if i.isalpha()]
 
             # Umwandlung in Binärzahl
-            operation = self.encode_operation([i for i in items if i.isalpha()])
-            speicher = self.encode_address([i for i in items if i.isnumeric() | i.__contains__('+')])
+            operation = self.encode_operation(operations)
+            # wenn die Operation == D ist, dann wird die Speicherzelle auf 644 gesetzt
+            if operations.__contains__('D'):
+                b = format(644, 'b')
+                speicher = ([0] * 5) + (([0] * (13 - len(b))) + (list(map(int, list(b)))))
+            # in allen anderen Fällen wird der String in eine Binärzahl umgewandelt
+            else:
+                speicher = self.encode_address([i for i in items if i.isnumeric() | i.__contains__('+')])
 
         # Zusammenfügen der einzelnen Teile zu einer Binärzahl
         binary += operation + speicher
@@ -128,59 +136,78 @@ class Befehl(Wort):
         for o in operation_list:
             # Überprüfung der einzelnen Befehle
             if o.__contains__('PP'):
-                operation[1] = 1
+                operation[0] = 1
                 self.isCondition = True
             if o.__contains__('P'):
-                operation[2] = 1
+                operation[1] = 1
                 self.isCondition = True
             if o.__contains__('QQ'):
-                operation[3] = 1
+                operation[2] = 1
                 self.isCondition = True
             if o.__contains__('Q'):
-                operation[4] = 1
+                operation[3] = 1
                 self.isCondition = True
             if o.__contains__('Y'):
-                operation[5] = 1
+                operation[4] = 1
                 self.isCondition = True
             if o.__contains__('C'):
-                operation[6] = 1
+                operation[5] = 1
                 self.isCondition = True
             if o.__contains__('N'):
-                operation[7] = 1
+                operation[6] = 1
                 self.isShift = True
-            if o.__contains__('LL'):
+            if o.__contains__('L'):
+                operation[7] = 1
                 operation[8] = 1
                 self.isShift = True
+            if o.__contains__('LL'):
+                operation[7] = 1
+                self.isShift = True
             if o.__contains__('R'):
-                operation[9] = 1
+                operation[8] = 1
                 self.isShift = True
             if o.__contains__('U'):
-                operation[10] = 1
+                operation[9] = 1
                 self.isArithmetic = True
             if o.__contains__('A'):
-                operation[11] = 1
+                operation[10] = 1
                 self.isArithmetic = True
             if o.__contains__('S'):
-                operation[12] = 1
+                operation[11] = 1
                 self.isArithmetic = True
             if o.__contains__('F'):
-                operation[13] = 1
+                operation[12] = 1
                 self.isJumpOrCall = True
             if o.__contains__('K'):
-                operation[14] = 1
+                operation[13] = 1
                 self.isCondition = True
             if o.__contains__('H'):
-                operation[15] = 1
+                operation[14] = 1
                 self.isCondition = True
             if o.__contains__('Z'):
-                operation[16] = 1
+                operation[15] = 1
                 self.isStop = True
             if o.__contains__('G'):
-                operation[17] = 1
+                operation[16] = 1
                 self.isCondition = True
             if o.__contains__('V'):
-                operation[18] = 1
+                operation[17] = 1
                 self.isCondition = True
+            if o.__contains__('D'):
+                operation[12] = 1
+            if o.__contains__('B'):
+                operation[6] = 1
+                operation[10] = 1
+                self.isReadOrSave = True
+            if o.__contains__('T'):
+                operation[6] = 1
+                operation[9] = 1
+                self.isReadOrSave = True
+            # TODO E-Befehl ist noch nicht abgedeckt
+            # hier könnte man es aber auch einfach dabei belassen:
+            # wenn Stellen 3 - 21 (also alle Operationsstellen) = 0 sind, dann ist es ein E-Befehl
+            if o.__contains__('E'):
+                self.isJumpOrCall = True
 
         return operation
 
