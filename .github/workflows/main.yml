@@ -18,6 +18,9 @@ jobs:
       - uses: actions/checkout@v3
 
       # Runs a single command using the runners shell
-      - name: Run a one-line script
+      - name: Run test.py
         run: python3 test.py
+
+      - name: Run testCpu.py
+        run: python3 testCpu.py
 
