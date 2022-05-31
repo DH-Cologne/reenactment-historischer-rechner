@@ -72,15 +72,15 @@ class Memory:
     def set(self, zelle: int, word: str) -> bool:
         """ """
         if zelle in list(self.memory.keys()):
-            self.memory[zelle] = word
+            self.memory[zelle] = parse(word)
         else:
-            self.memory.update({zelle: word})
+            self.memory.update({zelle: parse(word)})
         pass
 
     def get(self, zelle: int, binary=False) -> str:
         """ """
         if zelle not in list(self.memory.keys()):
-            raise Exception(f"Cell address {zelle} is empty.")
+            return wort.parse('0\'')
         else:
             return self.memory[zelle]
 

@@ -57,8 +57,10 @@ def parse(strWort):
     obj = None
     wort = strWort
     # check Strichzahl
-    if wort[-1] == '\'' or wort == '0':
+    if wort[-1] == '\'':
         obj = Ganzzahl(strWort[0:-1])
+    elif wort == '0':
+        obj = Ganzzahl(strWort)
     # check Klartext (lexikalisches Wort)
     elif not bool(re.search(r'\d', wort)) and wort != 'D':
         obj = Klartext(strWort)
@@ -308,6 +310,7 @@ if __name__ == '__main__':
     w5 = parse('2\'')
     w6 = parse('B0+1900')
     w7 = parse('E1720E')
+    w8 = parse('0')
 
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
@@ -315,12 +318,14 @@ if __name__ == '__main__':
     print('Typ von String {} ist {}'.format(w4.strWort, type(w4)))
     print('Typ von String {} ist {}'.format(w5.strWort, type(w5)))
     print('Typ von String {} ist {}'.format(w6.strWort, type(w6)))
+    print('Typ von String {} ist {}'.format(w7.strWort, type(w7)))
+    print('Typ von String {} ist {}'.format(w8.strWort, type(w8)))
 
-    print(w5.getBinary())
-    print(w4.getBinary())
     print(w1.getBinary())
-    print(w6.getBinary())
     print(w2.getBinary())
     print(w3.getBinary())
+    print(w4.getBinary())
+    print(w5.getBinary())
+    print(w6.getBinary())
     print(w7.getBinary())
-
+    print(w8.getBinary())
