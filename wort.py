@@ -48,30 +48,32 @@ jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextze
 """
 
 
+def parse(strWort):
+    """
+    Prüfen, um welchen Untertyp es sich handelt und ein Objekt des entsprechenden Typs erstellen
+    :return: Objekt des jeweiligen Typs
+    """
+    strWort.strip()
+    obj = None
+    wort = strWort
+    # check Strichzahl
+    if wort[-1] == '\'':
+        obj = Ganzzahl(strWort[0:-1])
+    # check Klartext (lexikalisches Wort)
+    elif not bool(re.search(r'\d', wort)) and wort != 'D':
+        obj = Klartext(strWort)
+    # check Befehl
+    elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
+        obj = Befehl(strWort)
+    # sonst fehlerhafter Input
+    else:
+        raise Exception(f"Objekttyp für Input {wort} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
+    return obj
+
+
 class Wort:
     def __init__(self, strWort: str):
         self.strWort = strWort.strip()
-
-    def parse(self):
-        """
-        Prüfen, um welchen Untertyp es sich handelt und ein Objekt des entsprechenden Typs erstellen
-        :return: Objekt des jeweiligen Typs
-        """
-        obj = None
-        wort = self.strWort
-        # check Strichzahl
-        if wort[-1] == '\'':
-            obj = Ganzzahl(self.strWort[0:-1])
-        # check Klartext (lexikalisches Wort)
-        elif not bool(re.search(r'\d', wort)) and wort != 'D':
-            obj = Klartext(self.strWort)
-        # check Befehl
-        elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
-            obj = Befehl(self.strWort)
-        # sonst fehlerhafter Input
-        else:
-            raise Exception(f"Objekttyp für Input {wort} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
-        return obj
 
 
 class Befehl(Wort):
@@ -299,26 +301,26 @@ class Ganzzahl(Wort):
 
 
 if __name__ == '__main__':
-    w1 = Wort('EZ0+1E')
-    w2 = Wort('A0')
-    w3 = Wort('D')
-    w4 = Wort('SCHLOS')
-    w5 = Wort('2\'')
-    w6 = Wort('B0+1900')
-    w7 = Wort('E1720E')
+    w1 = parse('EZ0+1E')
+    w2 = parse('A0')
+    w3 = parse('D')
+    w4 = parse('SCHLOS')
+    w5 = parse('2\'')
+    w6 = parse('B0+1900')
+    w7 = parse('E1720E')
 
-    print('Typ von String {} ist {}'.format(w1.strWort, type(w1.parse())))
-    print('Typ von String {} ist {}'.format(w2.strWort, type(w2.parse())))
-    print('Typ von String {} ist {}'.format(w3.strWort, type(w3.parse())))
-    print('Typ von String {} ist {}'.format(w4.strWort, type(w4.parse())))
-    print('Typ von String {} ist {}'.format(w5.strWort, type(w5.parse())))
-    print('Typ von String {} ist {}'.format(w6.strWort, type(w6.parse())))
+    print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
+    print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
+    print('Typ von String {} ist {}'.format(w3.strWort, type(w3)))
+    print('Typ von String {} ist {}'.format(w4.strWort, type(w4)))
+    print('Typ von String {} ist {}'.format(w5.strWort, type(w5)))
+    print('Typ von String {} ist {}'.format(w6.strWort, type(w6)))
 
-    print(w5.parse().getBinary())
-    print(w4.parse().getBinary())
-    print(w1.parse().getBinary())
-    print(w6.parse().getBinary())
-    print(w2.parse().getBinary())
-    print(w3.parse().getBinary())
-    print(w7.parse().getBinary())
+    print(w5.getBinary())
+    print(w4.getBinary())
+    print(w1.getBinary())
+    print(w6.getBinary())
+    print(w2.getBinary())
+    print(w3.getBinary())
+    print(w7.getBinary())
 
