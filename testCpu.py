@@ -7,15 +7,12 @@ class TestUtil(unittest.TestCase):
     # set up memory
     mem1 = [0 for x in range(0,10)]
     mem1[2] = 5
-    mem1[4] = 0 # akkumulator
     
     cpu = CPU(mem1, verbose=False, interactive=False)
     # Put command into Befehlsregister
-    cpu.b = "PPQQA2"
-    cpu.c = "E6"
     
     # Execute single step
-    cpu._step()
+    cpu._step(a=0, b="PPQQA2", c="E6")
     
     # Check that results are as expected
     self.assertEquals(mem1[4], 5)

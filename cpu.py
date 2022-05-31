@@ -19,7 +19,7 @@ class CPU:
       if self.interactive:
         input()
     
-  def _step(self):
+  def _step(self, a=None, b=None, c=None):
     """ Executes the command currently in b. If it's not a Sprungbefehl, also load c into b. """
     # Interpret self.b as Befehl
     # Ask for its nature (i.e., A, I, ...)
@@ -30,7 +30,13 @@ class CPU:
     
     self._log("CPU executes step ", self.currentStep)
     self._log("CPU status: b=",str(self.b), ", c=",str(self.c), ", a=", self._a())
-      
+    
+    if a != None:
+      self._a(a)
+    if b != None: 
+      self.b = b
+    if c != None:
+      self.c = c
     # 1. Parse the command (to be replaced by other code)
     # if its a 0 or "0", we set befehl and address to 0
     try: 
