@@ -1,27 +1,56 @@
 import io
 import os.path
 import re
+import csv
 
-import memory
+#import memory
 
-memory = memory.Memory()
 
-def printMemory(auswahl):
-    '''print state of memory and registers'''
-    # memory_state = memory.getAll()
-    # register_state = cpu.getRegister()
-    # if auswahl == 0:
-    #     pass
-    # elif auswahl == 1:
-    #     pass
-    # elif auswahl == 2:
-    #     pass
-    pass
+class IoMemory:
+    def __init__(self):
+        self.memory_list =[]
+
+    def collectMemory(self, memory):
+        '''
+        saves the current status of the memory into a list
+        '''
+        memory_dict = memory.getAll()
+        for speicherzelle, speicherinhalt in memory_dict.items():
+            memory_dict[speicherzelle] = speicherinhalt.strWort
+
+        self.memory_list.add(memory_dict)
+  
+    def printMemory(self, old_step, current_step):
+        '''
+        print state of memory and registers in relation to the status of the memory one step before
+        
+        '''
+       
+        memory_change = []
+
+      
+        for speicherzelle, old_speicherinhalt in self.memory_list[old_step].items():
+        
+            new_speicherinhalt = self.memory_list[current_step][speicherzelle]
+            if old_speicherinhalt == new_speicherinhalt:
+                continue
+            else:
+                memory_change.append([speicherzelle, old_speicherinhalt, new_speicherinhalt])
+
+        
+        with open("Step%s_memory_change.csv" %current_step, "w") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Speicherzelle",old_step, current_step])
+            writer.writerows(memory_change)
+       
+        
     
 def readProgram(txt):
     '''
     reads in the program, saves it into the memory and executes Bandbefehle
     '''
+    memory = memory.Memory()
+
     # Abwandlung von bandbefehle.py
 
     # re to detect TmT commands
@@ -68,26 +97,32 @@ def readProgram(txt):
             # and increase next counter by one
             nextPosition += 1
     
-    #return memory, startingPoint
+    return memory, startingPoint
 
-
-class ResultPrinter:
-    def __init__(self):
-        self.strToPrint =""
-
-    def collectPrint(self):
-        '''adds the accumulator to strToPrint'''
-        #self.strToPrint += memory.get()
-
-        pass
-    def printAll(self):
-        '''prints all into a text file'''
-        #print(self.strToPrint)
-        # with open("result.txt", "w") as f:
-        #     f.write(self.strToPrint)  
-        pass    
 
 if __name__ == '__main__':
 
-    b = ResultPrinter()
-    
+    io = IoMemory()
+    io.memory_list=[
+        {
+            "1": "23",
+            "2": "24",
+            "3": "25",
+            "4": "25",
+            "5": "25",
+            "6": "25",
+            "7": "25",
+        },
+        {
+            "1": "25",
+            "2": "25",
+            "3": "25",
+            "4": "25",
+            "5": "25",
+            "6": "25",
+            "7": "25",
+            
+        }
+        ]
+    io.printMemory(0,1)
+

@@ -1,10 +1,8 @@
-# import input_output
-# import cpu
-# import memory
+import input_output
+import cpu
+import memory
 
-# memory = memory.Memory()
-# printer = input_output.Printer()
-# cpu = cpu.CPU()
+memory,startingPoint = input_output.readProgram("texte.z22")
 
-# cpu.start(input_output.readProgram, printer)
-# io.printAll()
+cpu = cpu.CPU(memory)
+cpu.start(startingPoint)
