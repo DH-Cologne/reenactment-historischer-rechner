@@ -51,6 +51,7 @@ jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextze
 def parse(strWort):
     """
     Prüfen, um welchen Untertyp es sich handelt und ein Objekt des entsprechenden Typs erstellen
+    :param strWort: Wort als String
     :return: Objekt des jeweiligen Typs
     """
     strWort.strip()
@@ -71,6 +72,15 @@ def parse(strWort):
     else:
         raise Exception(f"Objekttyp für Input {wort} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
     return obj
+
+
+def parseBinary(binary):
+    """
+    Prüfen, um welchen Untertyp es sich handelt und ein Objekt des entsprechenden Typs erstellen
+    :param binary: Wort als Binärrepräsentation
+    :return: Objekt des jeweiligen Typs
+    """
+    pass
 
 
 class Wort:
