@@ -50,6 +50,10 @@ class CPU:
     
     ## 2. Now we have parsed, we execute the commands.
     
+    operands = (self._a(), self.memory[address])
+    if "C" in befehl:
+      operands[1] = address
+    
     # Sprungbefehle E and F
     if self._applyConditions(befehl):
       if befehl == "E" or befehl == "F":
@@ -76,13 +80,13 @@ class CPU:
           self._a(0)
       # LLA
       elif befehl == "LLA":
-        self._a((self._a() << 2) + self.memory[address])
+        self._a((self._a() << 2) + operands[1])
       # A
       elif befehl == "A":
-        self._a(self._a() + self.memory[address])
+        self._a(self._a() + operands[1)
       # RA
       elif befehl == "RA":
-        self._a((self._a() >> 1) + self.memory[address])
+        self._a((self._a() >> 1) + operands[1])
       # CI
       elif befehl == "CI":
         self._a(self._a() & address)
