@@ -1,5 +1,5 @@
 import numpy as np
-
+import wort
 
 # Frage: Trommelspeicher mit 8192 speicherzellen für je 1 Wort: Notwendig für unsere Implementierung,
 # die obere Grenze festzulegen?
@@ -68,14 +68,25 @@ class Memory:
 
         self.memory.update(self.zero)
         self.memory.update(self.akkumulator)
+        self.memory.update({'b': parse('0\'')})
+        self.memory.update({'c': parse('0\'')})
 
-    def set(self, zelle: int, word: str) -> bool:
+    def set(self, zelle: int, word) -> bool:
         """ """
-        if zelle in list(self.memory.keys()):
-            self.memory[zelle] = parse(word)
-        else:
-            self.memory.update({zelle: parse(word)})
-        pass
+
+        if type(word) == String:
+            if zelle in list(self.memory.keys()):
+                self.memory[zelle] = parse(word)
+            else:
+                self.memory.update({zelle: parse(word)})
+            pass
+
+        elif type(word) == wort.Wort:
+            if zelle in list(self.memory.keys()):
+                self.memory[zelle] = parse(word)
+            else:
+                self.memory.update({zelle: parse(word)})
+            pass
 
     def get(self, zelle: int, binary=False) -> str:
         """ """
