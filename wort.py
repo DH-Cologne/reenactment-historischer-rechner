@@ -55,6 +55,9 @@ def _parseGanzzahl(binary):
     elif binary[2] == 1:
         number = -int(''.join(map(str, binary[3:])), 2)
 
+    else:
+        raise Exception(f"{binary} is not valid.")
+
     return parse(str(number)+'\'')
 
 
