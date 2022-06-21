@@ -4,49 +4,6 @@ import re
 from baudot import encode_str, codecs, handlers
 from io import StringIO
 
-"""
-Notizen aus Stunde am 03.05.2022
-class Wort
-- getBinary(zelle)
-- parse(str) --> Wort 
- 	- würde String einlesen und checken, ob Word, Befehl, 
- 	Klartext oder Ganzzahl & entsprechendes Objekt erzeugen
-
-class Befehl(Wort)
-- isAddition()
-- getAddons()
-
-class Klartext(Wort)
-- getBinary
-
-class Ganzzahl(Wort)
-
-Binärzahl als Liste [0,1,0,0,1...] mit len = 38
-
-
-Repräsentation von Daten
-1. und 2. Bit: Type
-3. Bit 0 oder 1? Umschalter zwischen Zahlen und Buchstaben?
-7 Zeichen a 5 bits
-
-Zahl: '-124'
-Befehl: 'E1586'
-Wort: 'Wort'
-
-Repräsentation von Zahlen
-Repräsentation von Buchstaben
-Repräsentation von Befehlen
-
-alles 38 bits (38-stellige Binärzahlen)
-
-jede Speicherzelle hat 38 Dualstellen: eine Zahl, einen Befehl oder 7 Klartextzeichen
-
-11 negative Zahl
-00 positive Zahl
-01 Buchstaben
-10 Befehle
-"""
-
 
 def parse(strWort):
     """
@@ -80,12 +37,41 @@ def parseBinary(binary):
     :param binary: Wort als Binärrepräsentation
     :return: Objekt des jeweiligen Typs
     """
+
+    if binary[0] == binary[1]:
+        return _parseGanzzahl(binary)
+
+    elif binary[0] == 0:
+        return _parseBefehl(binary)
+
+    elif binary[0] == 1:
+        return _parseWort(binary)
+
+
+def _parseGanzzahl(binary):
+
+    if binary[2] == 0:
+        number = int(''.join(map(str, binary[3:])), 2)
+    elif binary[2] == 1:
+        number = -int(''.join(map(str, binary[3:])), 2)
+
+    return parse(str(number)+'\'')
+
+
+def _parseBefehl(binary):
+    pass
+
+
+def _parseWort(binary):
     pass
 
 
 class Wort:
     def __init__(self, strWort: str):
         self.strWort = strWort.strip()
+
+    def __repr__(self):
+        return self.strWort
 
 
 class Befehl(Wort):
@@ -320,6 +306,10 @@ class Ganzzahl(Wort):
             raise Exception(f"Strichzahl {self.float_rep} is out of bound.")
 
     def getBinary(self) -> list:
+        """
+        Binärzahl aus String erstellen
+        :return: 38-stellige Binärzahl als Liste
+        """
 
         bin_number = list(bin(int(self.strWort)).split("b")[1].strip(" "))
 
@@ -348,6 +338,9 @@ if __name__ == '__main__':
     w6 = parse('B0+1900')
     w7 = parse('E1720E')
     w8 = parse('0')
+    w9 = parse('7\'')
+    w10 = parse('-7\'')
+
 
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
@@ -366,3 +359,17 @@ if __name__ == '__main__':
     print(w6.getBinary())
     print(w7.getBinary())
     print(w8.getBinary())
+
+    print(w5.getBinary())
+    print(parseBinary(w5.getBinary()))
+
+    print(w8.getBinary())
+    print(parseBinary(w8.getBinary()))
+
+    print(w9.getBinary())
+    print(parseBinary(w9.getBinary()))
+
+    print(w10.getBinary())
+    print(parseBinary(w10.getBinary()))
+    print(type(parseBinary(w10.getBinary())))
+
