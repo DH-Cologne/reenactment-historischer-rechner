@@ -62,9 +62,18 @@ class Memory:
 
 if __name__ == '__main__':
     speicher = Memory()
+
+    speicher.set(12, "SCHLOS")
+    speicher.set(13, "5'")
+    speicher.set(14, 'B0+1900')
+    speicher.set(15, 'E1720E')
     print(speicher.get(8))
     print(speicher.get(4))
     print(speicher.get(0))
+    print(speicher.get(12))
+    print(speicher.get(13))
+    print(speicher.get(14))
+    print(speicher.get(15))
 
     print(speicher.get(10))
     speicher.set(4, "Akkumulator")
