@@ -41,15 +41,14 @@ def parseBinary(binary):
     if binary[0] == binary[1]:
         return _parseGanzzahl(binary)
 
-    elif binary[0] == 0:
+    elif binary[0] == 1:
         return _parseBefehl(binary)
 
-    elif binary[0] == 1:
+    elif binary[0] == 0:
         return _parseWort(binary)
 
 
 def _parseGanzzahl(binary):
-
     if binary[2] == 0:
         number = int(''.join(map(str, binary[3:])), 2)
     elif binary[2] == 1:
@@ -58,11 +57,51 @@ def _parseGanzzahl(binary):
     else:
         raise Exception(f"{binary} is not valid.")
 
-    return parse(str(number)+'\'')
+    return parse(str(number) + '\'')
 
 
 def _parseBefehl(binary):
-    pass
+    if len(binary) != 38:
+        raise Exception(f"{binary} is not valid.")
+
+    voc = ['PP', 'P', 'QQ', 'Q', 'Y', 'C', 'N', 'LL', 'R', 'U', 'A', 'S', 'F', 'K', 'H', 'Z', 'G', 'V']
+    operation = str()
+    if (binary[11:12] == 0) & (binary[14] == 0):
+        for i, b in enumerate(binary[2:10]):
+            operation += str(voc[i])
+        operation += 'E'
+        for i, b in enumerate(binary[13:19]):
+            operation += str(voc[i])
+    else:
+        for i, b in enumerate(binary[2:19]):
+            if b != 0:
+                operation += str(voc[i])
+
+    schnellspeicher = int(''.join(map(str, binary[20:24])), 2)
+    trommelspeicher = int(''.join(map(str, binary[25:])), 2)
+
+    if operation.__contains__('UA'):
+        operation = operation.replace('UA', 'I')
+    if operation.__contains__('LLR'):
+        operation = operation.replace('LLR', 'L')
+    if operation.__contains__('NA'):
+        operation = operation.replace('NA', 'B')
+    if operation.__contains__('NU'):
+        operation = operation.replace('NU', 'T')
+    if operation.__contains__('F') & trommelspeicher == 644:
+        operation = operation.replace('F', 'D')
+
+    # TODO return noch nicht richtig
+    # Problem: Was passiert, wenn der Schnellspeicher eigentlich im Befehl nicht vorkommt?
+    # Es wird immer 0 zurückgegeben
+    if trommelspeicher > 32 & schnellspeicher <= 32:
+        return parse(operation + str(schnellspeicher) + '+' + str(trommelspeicher))
+
+    if (trommelspeicher < 32 | trommelspeicher == 0) & schnellspeicher <= 32:
+        return parse(operation + str(schnellspeicher))
+
+    if trommelspeicher > 32 & schnellspeicher > 32:
+        return parse(operation + str(trommelspeicher))
 
 
 def _parseWort(binary):
@@ -134,17 +173,19 @@ class Befehl(Wort):
         operation = [0] * 18
         for o in operation_list:
             # Überprüfung der einzelnen Befehle
-            if o.__contains__('PP'):
-                operation[0] = 1
-                self.isCondition = True
             if o.__contains__('P'):
-                operation[1] = 1
-                self.isCondition = True
-            if o.__contains__('QQ'):
-                operation[2] = 1
+                counter = o.count('P')
+                if (counter % 2) == 0:
+                    operation[0] = 1
+                else:
+                    operation[1] = 1
                 self.isCondition = True
             if o.__contains__('Q'):
-                operation[3] = 1
+                counter = o.count('Q')
+                if (counter % 2) == 0:
+                    operation[2] = 1
+                else:
+                    operation[3] = 1
                 self.isCondition = True
             if o.__contains__('Y'):
                 operation[4] = 1
@@ -156,11 +197,12 @@ class Befehl(Wort):
                 operation[6] = 1
                 self.isShift = True
             if o.__contains__('L'):
-                operation[7] = 1
-                operation[8] = 1
-                self.isShift = True
-            if o.__contains__('LL'):
-                operation[7] = 1
+                counter = o.count('L')
+                if (counter % 2) == 0:
+                    operation[7] = 1
+                else:
+                    operation[7] = 1
+                    operation[8] = 1
                 self.isShift = True
             if o.__contains__('R'):
                 operation[8] = 1
@@ -202,15 +244,14 @@ class Befehl(Wort):
                 operation[6] = 1
                 operation[9] = 1
                 self.isReadOrSave = True
-            # TODO E-Befehl ist noch nicht abgedeckt
-            # hier könnte man es aber auch einfach dabei belassen:
-            # wenn Stellen 3 - 21 (also alle Operationsstellen) = 0 sind, dann ist es ein E-Befehl
             if o.__contains__('E'):
                 self.isJumpOrCall = True
+                operation[9] = 0
+                operation[10] = 0
 
         return operation
 
-    def encode_address(self, address_list: list):
+    def encode_address(self, address_list: list) -> list:
         """
            String Speicheradresse wird zu 18-stelliger Binärzahl umgewandelt.
            Unterteilung des Schnell- (5-stellig) und Trommelspeichers (13-stellig).
@@ -281,7 +322,7 @@ class Klartext(Wort):
         # Entsprechende Bits auf 1 setzen
         for i in range(len(baudot_wort)):
             if baudot_wort[i] == '*':
-                binary[i+3] = 1
+                binary[i + 3] = 1
         return list(binary)
 
     def _baudot_encode(self, wort: str) -> str:
@@ -333,17 +374,16 @@ class Ganzzahl(Wort):
 
 
 if __name__ == '__main__':
-    w1 = parse('EZ0+1E')
+    w1 = parse('PPQQE1850')
     w2 = parse('A0')
     w3 = parse('D')
     w4 = parse('SCHLOS')
     w5 = parse('2\'')
     w6 = parse('B0+1900')
-    w7 = parse('E1720E')
+    w7 = parse('PQE1850')
     w8 = parse('0')
     w9 = parse('7\'')
     w10 = parse('-7\'')
-
 
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
@@ -356,10 +396,16 @@ if __name__ == '__main__':
 
     print(w1.getBinary())
     print(w2.getBinary())
+    print(parseBinary(w2.getBinary()))
+
     print(w3.getBinary())
+    print(parseBinary(w3.getBinary()))
+
     print(w4.getBinary())
     print(w5.getBinary())
     print(w6.getBinary())
+    print(parseBinary(w6.getBinary()))
+
     print(w7.getBinary())
     print(w8.getBinary())
 
@@ -375,4 +421,3 @@ if __name__ == '__main__':
     print(w10.getBinary())
     print(parseBinary(w10.getBinary()))
     print(type(parseBinary(w10.getBinary())))
-
