@@ -83,7 +83,7 @@ class CPU:
         self._a((self._a() << 2) + operands[1])
       # A
       elif befehl == "A":
-        self._a(self._a() + operands[1)
+        self._a(self._a() + operands[1])
       # RA
       elif befehl == "RA":
         self._a((self._a() >> 1) + operands[1])
