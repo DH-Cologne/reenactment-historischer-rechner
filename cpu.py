@@ -109,9 +109,6 @@ class CPU:
       elif self._chk(befehl, 'N') and self._chk(befehl, 'U'):
         self.memory.set(operands[1], self._a())
         self._a(0)
-      # U
-      elif self._chk(befehl, 'U'):
-        self.memory.set(address, self._a())
       # LLA
       elif self._chk(befehl, 'LL') and self._chk(befehl, 'A'):
         self._a((self._a().getInt() << 2) + operands[1])
@@ -121,7 +118,10 @@ class CPU:
       # A
       elif self._chk(befehl, 'A'):
         self._a(self._a() + operands[1])
-      # CI
+      # U
+      elif self._chk(befehl, 'U'):
+        self.memory.set(address, self._a())
+      # I
       elif self._chk(befehl, 'I'):
         self._a(self._a() & operands[1])
     else:
