@@ -4,5 +4,7 @@ import memory
 
 memory,startingPoint = input_output.readProgram("texte.z22")
 
-cpu = cpu.CPU(memory)
+iomemory = input_output.IoMemory()
+
+cpu = cpu.CPU(memory, iomemory)
 cpu.start(startingPoint)
