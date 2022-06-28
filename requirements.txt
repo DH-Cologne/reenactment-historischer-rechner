@@ -1,2 +1,2 @@
-numpy~=1.22.3
+numpy>=1.20
 baudot~=0.1.1.post2
