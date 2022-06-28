@@ -26,6 +26,7 @@ def parse(strWort):
     elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
         obj = Befehl(strWort)
     # sonst fehlerhafter Input
+    # NR: Vielleicht auch int akzeptieren und in Ganzzahl überführen? 
     else:
         raise Exception(f"Objekttyp für Input {wort} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
     return obj
@@ -236,6 +237,8 @@ class Befehl(Wort):
                 self.isCondition = True
             if o.__contains__('D'):
                 operation[12] = 1
+                # NR: Reicht das? D müsste doch zu F644 werden, 
+                # d.h. hier müsste auch eine Speicheradresse definiert werden.
             if o.__contains__('B'):
                 operation[6] = 1
                 operation[10] = 1
