@@ -1,8 +1,10 @@
 import input_output
 import cpu
 import memory
+from sys import argv
 
-memory,startingPoint = input_output.readProgram("texte.z22")
+filePath =argv[1]
+memory,startingPoint = input_output.readProgram(filePath)
 
 iomemory = input_output.IoMemory()
 
