@@ -151,20 +151,20 @@ class Befehl(Wort):
             operations = [i for i in items if i.isalpha()]
 
             # Umwandlung in Binärzahl
-            operation = self.encode_operation(operations)
+            operation = self.encodeOperation(operations)
             # wenn die Operation == D ist, dann wird die Speicherzelle auf 644 gesetzt
             if operations.__contains__('D'):
                 b = format(644, 'b')
                 speicher = ([0] * 5) + (([0] * (13 - len(b))) + (list(map(int, list(b)))))
             # in allen anderen Fällen wird der String in eine Binärzahl umgewandelt
             else:
-                speicher = self.encode_address([i for i in items if i.isnumeric() | i.__contains__('+')])
+                speicher = self.encodeAddress([i for i in items if i.isnumeric() | i.__contains__('+')])
 
         # Zusammenfügen der einzelnen Teile zu einer Binärzahl
         binary += operation + speicher
         return binary
 
-    def encode_operation(self, operation_list: list) -> list:
+    def encodeOperation(self, operation_list: list) -> list:
         """
         String Befehl wird zu 18-stelliger Binärzahl umgewandelt.
         :param operation_list Liste mit allen genannten Operationen einer Speicherzelle
@@ -237,8 +237,6 @@ class Befehl(Wort):
                 self.isCondition = True
             if o.__contains__('D'):
                 operation[12] = 1
-                # NR: Reicht das? D müsste doch zu F644 werden, 
-                # d.h. hier müsste auch eine Speicheradresse definiert werden.
             if o.__contains__('B'):
                 operation[6] = 1
                 operation[10] = 1
@@ -254,7 +252,7 @@ class Befehl(Wort):
 
         return operation
 
-    def encode_address(self, address_list: list) -> list:
+    def encodeAddress(self, address_list: list) -> list:
         """
            String Speicheradresse wird zu 18-stelliger Binärzahl umgewandelt.
            Unterteilung des Schnell- (5-stellig) und Trommelspeichers (13-stellig).
@@ -321,14 +319,14 @@ class Klartext(Wort):
         # 1 Leerzeichen anhängen
         wort += ' '
         # baudot encodieren des Wortes
-        baudot_wort = self._baudot_encode(wort)
+        baudot_wort = self._baudotEncode(wort)
         # Entsprechende Bits auf 1 setzen
         for i in range(len(baudot_wort)):
             if baudot_wort[i] == '*':
                 binary[i + 3] = 1
         return list(binary)
 
-    def _baudot_encode(self, wort: str) -> str:
+    def _baudotEncode(self, wort: str) -> str:
         """
         String Wort als Baudot Code encodieren
         :param wort: Input Wort als String

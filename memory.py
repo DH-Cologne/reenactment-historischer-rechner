@@ -18,8 +18,6 @@ class Memory:
 
     def __init__(self):
         self.memory = {}
-        # TODO: Akkumulator auch mir 'a' in dict? Extra Zugriff auf Akkumulator?
-        # => Akkumulator ist an Stelle 4, die wird doch hier gesetzt. Sollte also nicht notwendig sein
         self.memory.update({0: wort.parse('0\'')})
         self.memory.update({4: wort.parse('0\'')})
         self.memory.update({'b': wort.parse('0\'')})
