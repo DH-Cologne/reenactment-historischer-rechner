@@ -35,7 +35,7 @@ class Memory:
             else:
                 self.memory.update({zelle: wort.parse(word)})
         # elif object of class Wort safe object
-        elif type(word) == wort.Wort:
+        elif isinstance(word, wort.Wort):
             if zelle in list(self.memory.keys()):
                 self.memory[zelle] = word
             else:
