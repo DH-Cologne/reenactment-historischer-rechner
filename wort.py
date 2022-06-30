@@ -62,12 +62,17 @@ def _parseGanzzahl(binary):
 
 
 def _parseBefehl(binary):
+    # Überprüfung, ob die Binärzahl alle notwendigen Stellen hat
     if len(binary) != 38:
         raise Exception(f"{binary} is not valid.")
 
+    # Initialisierung aller Befehle als Vokabular
     voc = ['PP', 'P', 'QQ', 'Q', 'Y', 'C', 'N', 'LL', 'R', 'U', 'A', 'S', 'F', 'K', 'H', 'Z', 'G', 'V']
+    # Initialisierung des Befehls-String
     operation = str()
-    if all(v == 0 for v in binary[11:12]) and (binary[14] == 0):
+    # Überprüfung, ob es sich um einen E-Befehl handelt
+    # hierbei müssen Stellen 11,12 und 14 = 0 sein
+    if all(v == 0 for v in binary[11:13]) and (binary[14] == 0):
         for i, b in enumerate(binary[2:10]):
             if b != 0:
                 operation += str(voc[i])
@@ -75,42 +80,54 @@ def _parseBefehl(binary):
         for i, b in enumerate(binary[13:19]):
             if b != 0:
                 operation += str(voc[13 + i])
+    # alle anderen Befehle können einfach aneinander gekettet werden
     else:
         for i, b in enumerate(binary[2:19]):
             if b != 0:
                 operation += str(voc[i])
 
+    # Schnell- und Trommelspeicher werden aus Binärzahl dekodiert
     schnellspeicher = int(''.join(map(str, binary[20:24])), 2)
     trommelspeicher = int(''.join(map(str, binary[25:])), 2)
 
-    if operation.__contains__('UA') | operation.__eq__('UA'):
+    # Auflösung von Sonderfällen I, L, B, T und D
+    if operation.__contains__('UA') or operation.__eq__('UA'):
         operation = operation.replace('UA', 'I')
-    if operation.__contains__('LLR') | operation.__eq__('LLR'):
+    if operation.__contains__('LLR') or operation.__eq__('LLR'):
         operation = operation.replace('LLR', 'L')
-    if operation.__contains__('NA') | operation.__eq__('NA'):
+    if operation.__contains__('NA') or operation.__eq__('NA'):
         operation = operation.replace('NA', 'B')
-    if operation.__contains__('NU') | operation.__eq__('NU'):
+    if operation.__contains__('NU') or operation.__eq__('NU'):
         operation = operation.replace('NU', 'T')
-    if operation.__contains__('F') | operation.__eq__('F') & trommelspeicher == 644:
+    if operation.__contains__('F') or operation.__eq__('F') and trommelspeicher == 644:
         operation = operation.replace('F', 'D')
         schnellspeicher = 0
         trommelspeicher = 0
 
-    # TODO return noch nicht richtig
-    # Problem: Was passiert, wenn der Schnellspeicher eigentlich im Befehl nicht vorkommt?
-    # Es wird immer 0 zurückgegeben
-    if trommelspeicher >= 32 & schnellspeicher < 32:
+    # Zusammenfügen der Befehls- und Speicherstrings
+    # Schnell- und Trommelspeicher
+    if trommelspeicher >= 32 and schnellspeicher < 32:
+        # 1.a Schnellspeicher ist 0
         if schnellspeicher == 0:
+            # Sonderfall Befehl B<s>+<t>
             if operation.__contains__('B'):
                 return parse(operation + str(schnellspeicher) + '+' + str(trommelspeicher))
+            # andernfalls wird nur Trommelspeicher angegeben
+            # interne Darstellung, wenn Schnellspeicher nicht genutzt wird: <Befehl>0+<t>
+            # extern abkürzbar mit: <Befehl><t>
             else:
                 return parse(operation + str(trommelspeicher))
+        # wenn Schnellspeicher != 0 ist, dann werden beide Speicherstellen mit einem + verbunden
         else:
             return parse(operation + str(schnellspeicher) + '+' + str(trommelspeicher))
 
+    # wenn nur der Schnellspeicher genutzt wird, ist die Stelle K = 1
+    # in externer Darstellung wird das K aber nicht angezeigt
+    # z.B. AK0 -> A0
     if operation.__contains__('K'):
         return parse(operation.replace('K', '') + str(schnellspeicher))
 
+    # Sonderfall D: nur Befehl wird ausgegeben
     if operation.__contains__('D'):
         return parse(operation)
 
