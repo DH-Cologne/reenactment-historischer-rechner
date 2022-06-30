@@ -45,7 +45,7 @@ class MemoryTest(unittest.TestCase):
         self.assertEqual(len(list_example), len(w1.getBinary()))
         w2 = wort.parse('A0')
         self.assertEqual(
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0], w2.getBinary())
         self.assertEqual(len(list_example), len(w2.getBinary()))
         w3 = wort.parse('D')

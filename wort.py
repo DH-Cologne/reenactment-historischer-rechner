@@ -67,12 +67,14 @@ def _parseBefehl(binary):
 
     voc = ['PP', 'P', 'QQ', 'Q', 'Y', 'C', 'N', 'LL', 'R', 'U', 'A', 'S', 'F', 'K', 'H', 'Z', 'G', 'V']
     operation = str()
-    if (binary[11:12] == 0) & (binary[14] == 0):
+    if all(v == 0 for v in binary[11:12]) and (binary[14] == 0):
         for i, b in enumerate(binary[2:10]):
-            operation += str(voc[i])
+            if b != 0:
+                operation += str(voc[i])
         operation += 'E'
         for i, b in enumerate(binary[13:19]):
-            operation += str(voc[i])
+            if b != 0:
+                operation += str(voc[13 + i])
     else:
         for i, b in enumerate(binary[2:19]):
             if b != 0:
@@ -81,28 +83,36 @@ def _parseBefehl(binary):
     schnellspeicher = int(''.join(map(str, binary[20:24])), 2)
     trommelspeicher = int(''.join(map(str, binary[25:])), 2)
 
-    if operation.__contains__('UA'):
+    if operation.__contains__('UA') | operation.__eq__('UA'):
         operation = operation.replace('UA', 'I')
-    if operation.__contains__('LLR'):
+    if operation.__contains__('LLR') | operation.__eq__('LLR'):
         operation = operation.replace('LLR', 'L')
-    if operation.__contains__('NA'):
+    if operation.__contains__('NA') | operation.__eq__('NA'):
         operation = operation.replace('NA', 'B')
-    if operation.__contains__('NU'):
+    if operation.__contains__('NU') | operation.__eq__('NU'):
         operation = operation.replace('NU', 'T')
-    if operation.__contains__('F') & trommelspeicher == 644:
+    if operation.__contains__('F') | operation.__eq__('F') & trommelspeicher == 644:
         operation = operation.replace('F', 'D')
+        schnellspeicher = 0
+        trommelspeicher = 0
 
     # TODO return noch nicht richtig
     # Problem: Was passiert, wenn der Schnellspeicher eigentlich im Befehl nicht vorkommt?
     # Es wird immer 0 zurückgegeben
-    if trommelspeicher > 32 & schnellspeicher <= 32:
-        return parse(operation + str(schnellspeicher) + '+' + str(trommelspeicher))
+    if trommelspeicher >= 32 & schnellspeicher < 32:
+        if schnellspeicher == 0:
+            if operation.__contains__('B'):
+                return parse(operation + str(schnellspeicher) + '+' + str(trommelspeicher))
+            else:
+                return parse(operation + str(trommelspeicher))
+        else:
+            return parse(operation + str(schnellspeicher) + '+' + str(trommelspeicher))
 
-    if (trommelspeicher < 32 | trommelspeicher == 0) & schnellspeicher <= 32:
-        return parse(operation + str(schnellspeicher))
+    if operation.__contains__('K'):
+        return parse(operation.replace('K', '') + str(schnellspeicher))
 
-    if trommelspeicher > 32 & schnellspeicher > 32:
-        return parse(operation + str(trommelspeicher))
+    if operation.__contains__('D'):
+        return parse(operation)
 
 
 def _parseWort(binary):
@@ -139,32 +149,43 @@ class Befehl(Wort):
         # Befehle beginnen mit [1,0]
         binary = [1, 0]
 
-        # Initialisierung von Binärzahl-Sequenzen, die dann mit Inhalt gefüllt werden
-        operation = list
-        speicher = list
-
         # trennen von Operations- + Adressteil
         match = re.match(r"([a-z]+)(\d+)?([+]\d+)?([a-z]+)?", befehl, re.I)
         if match:
             items = match.groups()
             items = [i for i in items if i is not None]
-            operations = [i for i in items if i.isalpha()]
 
-            # Umwandlung in Binärzahl
-            operation = self.encodeOperation(operations)
-            # wenn die Operation == D ist, dann wird die Speicherzelle auf 644 gesetzt
-            if operations.__contains__('D'):
-                b = format(644, 'b')
-                speicher = ([0] * 5) + (([0] * (13 - len(b))) + (list(map(int, list(b)))))
-            # in allen anderen Fällen wird der String in eine Binärzahl umgewandelt
-            else:
-                speicher = self.encodeAddress([i for i in items if i.isnumeric() | i.__contains__('+')])
+            # Zusammenfügen der einzelnen Teile zu einer Binärzahl
+            binary += self.encode(items)
 
-        # Zusammenfügen der einzelnen Teile zu einer Binärzahl
-        binary += operation + speicher
         return binary
 
-    def encodeOperation(self, operation_list: list) -> list:
+    def encode(self, items: list) -> list:
+        """
+        Übegeordnete Funktion zur Umwandlung des Operations- und Speicherteils der Binärzahl
+        Deckt besondere Fälle ab
+        :param items: Liste mit aufgetrennten String-Befehl
+        :return: Binärzahl des Befehls
+        """
+        operations = [i for i in items if i.isalpha()]
+        adressen = [i for i in items if i.isnumeric() | i.__contains__('+')]
+
+        # Umwandlung in Binärzahl
+        operation = self._encodeOperation(operations)
+        # wenn die Operation == D ist, dann wird die Speicherzelle auf 644 gesetzt
+        if operations.__contains__('D'):
+            b = format(644, 'b')
+            speicher = ([0] * 5) + (([0] * (13 - len(b))) + (list(map(int, list(b)))))
+        # in allen anderen Fällen wird der String in eine Binärzahl umgewandelt
+        else:
+            speicher = self._encodeAddress(adressen)
+        # wenn nur eine Schnellspeicheradresse angegeben ist, dann wird K = 1 gesetzt
+        if all(v == 0 for v in speicher[5:]):
+            operation[13] = 1
+
+        return operation + speicher
+
+    def _encodeOperation(self, operation_list: list) -> list:
         """
         String Befehl wird zu 18-stelliger Binärzahl umgewandelt.
         :param operation_list Liste mit allen genannten Operationen einer Speicherzelle
@@ -215,6 +236,7 @@ class Befehl(Wort):
                 operation[10] = 1
                 self.isArithmetic = True
             if o.__contains__('S'):
+                operation[10] = 1
                 operation[11] = 1
                 self.isArithmetic = True
             if o.__contains__('F'):
@@ -252,7 +274,7 @@ class Befehl(Wort):
 
         return operation
 
-    def encodeAddress(self, address_list: list) -> list:
+    def _encodeAddress(self, address_list: list) -> list:
         """
            String Speicheradresse wird zu 18-stelliger Binärzahl umgewandelt.
            Unterteilung des Schnell- (5-stellig) und Trommelspeichers (13-stellig).
@@ -271,7 +293,7 @@ class Befehl(Wort):
             # Umwandlung des Strings in einen Integer
             a = int(a)
             # Trommelspeicher
-            if a > 32:
+            if a >= 32:
                 # Umwandlung in Binärzahl
                 binary = format(a, 'b')
                 # Trommelspeicher hat insgesamt 13 Stellen. Die, die nicht für die Binärzahl gebraucht werden,
@@ -279,7 +301,7 @@ class Befehl(Wort):
                 trommelspeicher = [0] * (13 - len(binary))
                 trommelspeicher += list(map(int, list(binary)))
             # Schnellspeicher
-            elif a <= 32:
+            elif a < 32:
                 # Umwandlung in Binärzahl
                 binary = format(a, 'b')
                 # Schnellspeicher hat insgesamt 5 Stellen. Die, die nicht für die Binärzahl gebraucht werden,
@@ -386,29 +408,32 @@ if __name__ == '__main__':
     w9 = parse('7\'')
     w10 = parse('-7\'')
 
-    print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
+    """print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
     print('Typ von String {} ist {}'.format(w3.strWort, type(w3)))
     print('Typ von String {} ist {}'.format(w4.strWort, type(w4)))
     print('Typ von String {} ist {}'.format(w5.strWort, type(w5)))
     print('Typ von String {} ist {}'.format(w6.strWort, type(w6)))
     print('Typ von String {} ist {}'.format(w7.strWort, type(w7)))
-    print('Typ von String {} ist {}'.format(w8.strWort, type(w8)))
+    print('Typ von String {} ist {}'.format(w8.strWort, type(w8)))"""
 
     print(w1.getBinary())
+    print(parseBinary(w1.getBinary()))
+
     print(w2.getBinary())
     print(parseBinary(w2.getBinary()))
 
     print(w3.getBinary())
     print(parseBinary(w3.getBinary()))
 
-    print(w4.getBinary())
-    print(w5.getBinary())
+    """print(w4.getBinary())
+    print(w5.getBinary())"""
     print(w6.getBinary())
     print(parseBinary(w6.getBinary()))
 
     print(w7.getBinary())
-    print(w8.getBinary())
+    print(parseBinary(w7.getBinary()))
+    """print(w8.getBinary())
 
     print(w5.getBinary())
     print(parseBinary(w5.getBinary()))
@@ -421,4 +446,4 @@ if __name__ == '__main__':
 
     print(w10.getBinary())
     print(parseBinary(w10.getBinary()))
-    print(type(parseBinary(w10.getBinary())))
+    print(type(parseBinary(w10.getBinary())))"""
