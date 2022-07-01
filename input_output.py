@@ -19,7 +19,7 @@ class IoMemory:
         memory_dict = memory.getAll()
         for speicherzelle, speicherinhalt in memory_dict.items():
             memory_dict[speicherzelle] = speicherinhalt.strWort
-            #vermutlich muss hier eine Exception aufgefangen werden? -> dann memory_dict[speicherzelle]=None
+
 
         self.memory_list.add(memory_dict)
     # mehrere Steps?
@@ -61,17 +61,19 @@ class IoMemory:
             if old_step == None:
                 raise ValueError("Missing old_step parameter")
 
-            for speicherzelle, old_speicherinhalt in self.memory_list[old_step].items():
-            
-                new_speicherinhalt = self.memory_list[current_step][speicherzelle]
-                if old_speicherinhalt == new_speicherinhalt:
+            for speicherzelle, new_speicherinhalt in self.memory_list[current_step].items():
+                try:
+                    old_speicherinhalt = self.memory_list[old_step][speicherzelle]
+                except KeyError:
+                    old_speicherinhalt = None                
+                if new_speicherinhalt == old_speicherinhalt:
                     continue
                 else:
                     memory_change.append([speicherzelle, old_speicherinhalt, new_speicherinhalt])
             if output=="csv":
                 with open("Step%s_memory_change.csv" %current_step, "w") as file:
                     writer = csv.writer(file)
-                    writer.writerow(["Speicherzelle",old_step, current_step])
+                    writer.writerow(["Speicherzelle", old_step, current_step])
                     writer.writerows(memory_change)
 
             elif output=="console":
@@ -97,11 +99,11 @@ def readProgram(txt):
     re_exxxxe = re.compile(r"E([Z\d\+]+)E")
 
     # the file to load
-    file = os.path.join("data", txt)
+    #file = os.path.join("data", txt)
 
     # initial memory writing position
     nextPosition = 0
-    with open(file) as f:
+    with open(txt) as f:
         # read linewise
         for line in f.readlines():
             # remove newline at the end of each line
@@ -146,12 +148,12 @@ if __name__ == '__main__':
             "2": "24",
             "3": "25",
             "4": "25",
-            "5": "25",
+            #"5": "25",
             "6": "25",
             "7": "25",
         },
         {
-            "1": None,
+            "1": "20",
             "2": "25",
             "3": "25",
             "4": "25",
@@ -161,7 +163,7 @@ if __name__ == '__main__':
             
         }
         ]
-    io.printMemory(current_step=1, mode="changes", output="console", old_step=0)
+    io.printMemory(current_step=1, mode="changes", output="csv", old_step=0)
 
 
 # Tests: pseudo Speicher übergeben
