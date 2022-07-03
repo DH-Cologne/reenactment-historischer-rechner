@@ -1,8 +1,8 @@
 import numpy as np
 import re
 # https://python-baudot.readthedocs.io/en/latest/reference.html#baudot.codecs.BaudotCodec
-from baudot import encode_str, codecs, handlers
-from io import StringIO
+from baudot import encode_str, decode_to_str, codecs, handlers
+from io import StringIO, BytesIO
 
 
 def parse(strWort):
@@ -46,7 +46,7 @@ def parseBinary(binary):
         return _parseBefehl(binary)
 
     elif binary[0] == 0:
-        return _parseWort(binary)
+        return _parseKlartext(binary)
 
 
 def _parseGanzzahl(binary):
@@ -132,9 +132,45 @@ def _parseBefehl(binary):
         return parse(operation)
 
 
-def _parseWort(binary):
-    pass
+def _parseKlartext(binary):
+    # von Binärdarstellung als Liste mit 0 und 1 zu String Wort
+    bin_word = binary
+    # Liste aus 0 und 1 als baudot Tape darstellen
+    tape = _binaryToTape(bin_word)
+    with StringIO(tape) as code_stream:
+        reader = handlers.TapeReader(code_stream)
+        decoded = decode_to_str(reader, codecs.ITA2_STANDARD)
+    return decoded
 
+
+def _binaryToTape(bin_word):
+    # Binärliste zu baudot tape Repräsentation umwandeln
+    # Umschalttaste checken (für korrekte Darstellung von Punkt)
+    if bin_word[2] == 0:
+        tape_encoded = '***.**\n'
+    else:
+        tape_encoded = '** .**\n'
+    # Erste drei Stellen abschneiden
+    bin_word = bin_word[3:]
+    # Über Slices von je 5 bits iterieren und baudot tape enkodieren
+    for i in range(0,len(bin_word),5):
+        bin_char = bin_word[i:i+5]
+        # Nicht enkodieren wenn in den 5 bits alle 0 sind --> Wort zu Ende
+        if all(x == 0 for x in bin_char):
+            break
+        # line breaks einfügen, die für Tape Enkodierung notwendig sind
+        # Punkte einfügen, die für Tape Enkodierung notwendig sind
+        for j in range(len(bin_char)):
+            if j == 3:
+                tape_encoded += '.'
+            if bin_char[j] == 0:
+                tape_encoded += ' '
+            elif bin_char[j] == 1:
+                tape_encoded += '*'
+            else:
+                raise Exception(f"Binärwort {bin_word} enthält Elemente, die nicht 0 oder 1 sind")
+        tape_encoded += '\n'
+    return(tape_encoded)
 
 class Wort:
     def __init__(self, strWort: str):
@@ -420,19 +456,19 @@ if __name__ == '__main__':
     w4 = parse('SCHLOS')
     w5 = parse('2\'')
     w6 = parse('B0+1900')
-    w7 = parse('PQE1850')
+    w7 = parse('B1900')
     w8 = parse('0')
     w9 = parse('7\'')
     w10 = parse('-7\'')
 
-    """print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
+    print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
     print('Typ von String {} ist {}'.format(w3.strWort, type(w3)))
     print('Typ von String {} ist {}'.format(w4.strWort, type(w4)))
     print('Typ von String {} ist {}'.format(w5.strWort, type(w5)))
     print('Typ von String {} ist {}'.format(w6.strWort, type(w6)))
     print('Typ von String {} ist {}'.format(w7.strWort, type(w7)))
-    print('Typ von String {} ist {}'.format(w8.strWort, type(w8)))"""
+    print('Typ von String {} ist {}'.format(w8.strWort, type(w8)))
 
     print(w1.getBinary())
     print(parseBinary(w1.getBinary()))
@@ -443,14 +479,14 @@ if __name__ == '__main__':
     print(w3.getBinary())
     print(parseBinary(w3.getBinary()))
 
-    """print(w4.getBinary())
-    print(w5.getBinary())"""
+    print(w4.getBinary())
+    print(w5.getBinary())
     print(w6.getBinary())
     print(parseBinary(w6.getBinary()))
 
     print(w7.getBinary())
     print(parseBinary(w7.getBinary()))
-    """print(w8.getBinary())
+    print(w8.getBinary())
 
     print(w5.getBinary())
     print(parseBinary(w5.getBinary()))
@@ -463,4 +499,24 @@ if __name__ == '__main__':
 
     print(w10.getBinary())
     print(parseBinary(w10.getBinary()))
-    print(type(parseBinary(w10.getBinary())))"""
+    print(type(parseBinary(w10.getBinary())))
+
+    # # checken, ob _parseKlartext binär --> String funktioniert
+    # w4 = parse('ALT')
+    # bin_w4 = w4.getBinary()
+    # print(bin_w4)
+    # tape = _binaryToTape(bin_w4)
+    # decodedWort = _parseKlartext(bin_w4)
+    # print(decodedWort)
+    # # Okay, dass Leerzeichen bei Dekodierung mit ausgegeben wird?
+    #
+    # wort = 'ALT '
+    # with StringIO() as output_buffer:
+    #     writer = handlers.TapeWriter(output_buffer)
+    #     encode_str(wort, codecs.ITA2_STANDARD, writer)
+    #     output = output_buffer.getvalue()
+    #
+    # # Gegencheck: Tape Output von _binaryToTape == Decoding Output von baudot Bibliothek?
+    # print(tape.replace('\n', '/'))
+    # print(output.replace('\n', '/'))
+    # print(tape == output)
