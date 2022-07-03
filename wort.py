@@ -78,12 +78,12 @@ def _parseBefehl(binary):
             if b != 0:
                 operation += str(voc[i])
         operation += 'E'
-        for i, b in enumerate(binary[13:19]):
+        for i, b in enumerate(binary[13:20]):
             if b != 0:
                 operation += str(voc[13 + i])
     # alle anderen Befehle können einfach aneinander gekettet werden
     else:
-        for i, b in enumerate(binary[2:19]):
+        for i, b in enumerate(binary[2:20]):
             if b != 0:
                 operation += str(voc[i])
 

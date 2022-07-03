@@ -82,6 +82,9 @@ class MemoryTest(unittest.TestCase):
         w7 = wort.parse('B1730')
         self.assertEqual(wort.parseBinary(w7.getBinary()).strWort, w7.strWort)
         self.assertIsInstance(wort.parseBinary(w7.getBinary()), wort.Befehl)
+        w8 = wort.parse('AV0')
+        self.assertEqual(wort.parseBinary(w8.getBinary()).strWort, w8.strWort)
+        self.assertIsInstance(wort.parseBinary(w8.getBinary()), wort.Befehl)
 
 
 if __name__ == '__main__':
