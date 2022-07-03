@@ -66,8 +66,9 @@ def _parseBefehl(binary):
     if len(binary) != 38:
         raise Exception(f"{binary} is not valid.")
 
-    # Initialisierung aller Befehle als Vokabular
+    # Initialisierung aller Befehle als Vokabular + Sonderfall-Speicherzelle für B-Befehl
     voc = ['PP', 'P', 'QQ', 'Q', 'Y', 'C', 'N', 'LL', 'R', 'U', 'A', 'S', 'F', 'K', 'H', 'Z', 'G', 'V']
+    spec = [1900, 1950, 1990, 1993, 1996]
     # Initialisierung des Befehls-String
     operation = str()
     # Überprüfung, ob es sich um einen E-Befehl handelt
@@ -77,17 +78,17 @@ def _parseBefehl(binary):
             if b != 0:
                 operation += str(voc[i])
         operation += 'E'
-        for i, b in enumerate(binary[13:19]):
+        for i, b in enumerate(binary[13:20]):
             if b != 0:
                 operation += str(voc[13 + i])
     # alle anderen Befehle können einfach aneinander gekettet werden
     else:
-        for i, b in enumerate(binary[2:19]):
+        for i, b in enumerate(binary[2:20]):
             if b != 0:
                 operation += str(voc[i])
 
     # Schnell- und Trommelspeicher werden aus Binärzahl dekodiert
-    schnellspeicher = int(''.join(map(str, binary[20:24])), 2)
+    schnellspeicher = int(''.join(map(str, binary[20:25])), 2)
     trommelspeicher = int(''.join(map(str, binary[25:])), 2)
 
     # Auflösung von Sonderfällen I, L, B, T und D
@@ -99,7 +100,7 @@ def _parseBefehl(binary):
         operation = operation.replace('NA', 'B')
     if operation.__contains__('NU') or operation.__eq__('NU'):
         operation = operation.replace('NU', 'T')
-    if operation.__contains__('F') or operation.__eq__('F') and trommelspeicher == 644:
+    if (operation.__contains__('F') or operation.__eq__('F')) and trommelspeicher == 644:
         operation = operation.replace('F', 'D')
         schnellspeicher = 0
         trommelspeicher = 0
@@ -107,11 +108,17 @@ def _parseBefehl(binary):
     # Zusammenfügen der Befehls- und Speicherstrings
     # Schnell- und Trommelspeicher
     if trommelspeicher >= 32 and schnellspeicher < 32:
-        # 1.a Schnellspeicher ist 0
+        # Schnellspeicher ist 0
         if schnellspeicher == 0:
             # Sonderfall Befehl B<s>+<t>
             if operation.__contains__('B'):
-                return parse(operation + str(schnellspeicher) + '+' + str(trommelspeicher))
+                # workaround: Unterschied zwischen Binärzahl von 'B1900' und 'B0+1900' noch nicht klar
+                # die hier überprüften Speicherzellen kommen nur in Zusammenhang mit 'B0+' vor
+                if spec.__contains__(trommelspeicher):
+                    return parse(operation + str(schnellspeicher) + '+' + str(trommelspeicher))
+                # alle anderen werden einfach an den Befehl dran gehängt
+                else:
+                    return parse(operation + str(trommelspeicher))
             # andernfalls wird nur Trommelspeicher angegeben
             # interne Darstellung, wenn Schnellspeicher nicht genutzt wird: <Befehl>0+<t>
             # extern abkürzbar mit: <Befehl><t>
@@ -460,6 +467,7 @@ if __name__ == '__main__':
     w8 = parse('0')
     w9 = parse('7\'')
     w10 = parse('-7\'')
+    w11 = parse('CA1')
 
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
@@ -520,3 +528,6 @@ if __name__ == '__main__':
     # print(tape.replace('\n', '/'))
     # print(output.replace('\n', '/'))
     # print(tape == output)
+
+    print(w11.getBinary())
+    print(parseBinary(w11.getBinary()))
