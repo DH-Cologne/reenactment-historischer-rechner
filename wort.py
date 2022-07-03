@@ -5,30 +5,33 @@ from baudot import encode_str, decode_to_str, codecs, handlers
 from io import StringIO
 
 
-def parse(strWort):
+def parse(input):
     """
     Prüfen, um welchen Untertyp es sich handelt und ein Objekt des entsprechenden Typs erstellen
     :param strWort: Wort als String
     :return: Objekt des jeweiligen Typs
     """
-    strWort.strip()
     obj = None
-    wort = strWort
-    # check Strichzahl
-    if wort[-1] == '\'':
-        obj = Ganzzahl(strWort[0:-1])
-    elif wort == '0':
-        obj = Ganzzahl(strWort)
-    # check Klartext (lexikalisches Wort)
-    elif not bool(re.search(r'\d', wort)) and wort != 'D':
-        obj = Klartext(strWort)
-    # check Befehl
-    elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
-        obj = Befehl(strWort)
-    # sonst fehlerhafter Input
-    # NR: Vielleicht auch int akzeptieren und in Ganzzahl überführen? 
-    else:
-        raise Exception(f"Objekttyp für Input {wort} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
+    if type(input) == str:
+        input.strip()
+        wort = input
+        # check Strichzahl
+        if wort[-1] == '\'':
+            obj = Ganzzahl(input[0:-1])
+        elif wort == '0':
+            obj = Ganzzahl(input)
+        # check Klartext (lexikalisches Wort)
+        elif not bool(re.search(r'\d', wort)) and wort != 'D':
+            obj = Klartext(input)
+        # check Befehl
+        elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
+            obj = Befehl(input)
+        # sonst fehlerhafter Input
+        # NR: Vielleicht auch int akzeptieren und in Ganzzahl überführen?
+        else:
+            raise Exception(f"Objekttyp für Input {wort} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
+    elif type(input) == int:
+        obj = Ganzzahl(str(input))
     return obj
 
 
@@ -181,7 +184,7 @@ def _binaryToTape(bin_word):
 
 class Wort:
     def __init__(self, strWort: str):
-        self.strWort = strWort.strip()
+        self.strWort = strWort
 
     def __repr__(self):
         return self.strWort
@@ -468,6 +471,8 @@ if __name__ == '__main__':
     w9 = parse('7\'')
     w10 = parse('-7\'')
     w11 = parse('CA1')
+    w12 = parse('1\'')
+    w13 = parse('1\'')
 
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
@@ -477,6 +482,8 @@ if __name__ == '__main__':
     print('Typ von String {} ist {}'.format(w6.strWort, type(w6)))
     print('Typ von String {} ist {}'.format(w7.strWort, type(w7)))
     print('Typ von String {} ist {}'.format(w8.strWort, type(w8)))
+    print('Typ von String {} ist {}'.format(w12.strWort, type(w12)))
+    print('Typ von String {} ist {}'.format(w13.strWort, type(w13)))
 
     print(w1.getBinary())
     print(parseBinary(w1.getBinary()))
@@ -509,6 +516,15 @@ if __name__ == '__main__':
     print(parseBinary(w10.getBinary()))
     print(type(parseBinary(w10.getBinary())))
 
+    print(w11.getBinary())
+    print(parseBinary(w11.getBinary()))
+
+    print(w12.getBinary())
+    print(parseBinary(w12.getBinary()))
+
+    print(w13.getBinary())
+    print(parseBinary(w13.getBinary()))
+
     # # checken, ob _parseKlartext binär --> String funktioniert
     # w4 = parse('ALT')
     # bin_w4 = w4.getBinary()
@@ -528,6 +544,3 @@ if __name__ == '__main__':
     # print(tape.replace('\n', '/'))
     # print(output.replace('\n', '/'))
     # print(tape == output)
-
-    print(w11.getBinary())
-    print(parseBinary(w11.getBinary()))
