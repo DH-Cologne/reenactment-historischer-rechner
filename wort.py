@@ -2,7 +2,7 @@ import numpy as np
 import re
 # https://python-baudot.readthedocs.io/en/latest/reference.html#baudot.codecs.BaudotCodec
 from baudot import encode_str, decode_to_str, codecs, handlers
-from io import StringIO, BytesIO
+from io import StringIO
 
 
 def parse(strWort):
