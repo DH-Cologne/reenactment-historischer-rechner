@@ -75,7 +75,7 @@ class CPU:
     
     ## 2. Now we have parsed, we execute the commands.
     
-    operands = (self._a(), max(self._schnell(self._b()), self._trommel(self._b())))
+    operands = [self._a(), max(self._schnell(self._b()), self._trommel(self._b()))]
     if self._chk(befehl, 'C'): 
       operands[1] = dec(befehl[20:38])
     
@@ -115,15 +115,15 @@ class CPU:
       # RA
       elif self._chk(befehl, 'R') and self._chk(befehl, 'A'):
         self._a((self._a().getInt() >> 1) + operands[1])
+      # UA = I
+      elif self._chk(befehl, 'U') and self._chk(befehl, 'A'):
+        self._a(int(self._a()) & operands[1])
       # A
       elif self._chk(befehl, 'A'):
-        self._a(self._a() + operands[1])
+        self._a(int(self._a()) + operands[1])
       # U
       elif self._chk(befehl, 'U'):
-        self.memory.set(address, self._a())
-      # I
-      elif self._chk(befehl, 'I'):
-        self._a(self._a() & operands[1])
+        self.memory.set(operands[1], self._a())
     else:
       self._log("Condition not fulfilled.")
     
@@ -195,6 +195,8 @@ class CPU:
   def _a(self, value = None):
     """ Easier set and get access to the accumulator """
     if value:
+      if type(value) == int:
+        value = str(value)+"'"
       self.memory.set(4, value)
     else:
       return self.memory.get(4)
@@ -236,7 +238,7 @@ class CPU:
 
 if __name__=="__main__":
   
-  program = ["B5", "T112", "B113", "LLA0", "LLA0", "A113", "RA0", "RA0", "RA0", "RA0", "U113", "CI15", "0'", "12345678'", "B0+1900", "B0+1950", "B1982", "0'", "0'", "0'", "F100", "D", "DX113", "E120"]
+  program = ["B5", "T112", "B113", "LLA0", "LLA0", "A113", "RA0", "RA0", "RA0", "RA0", "U113", "CUA15", "0'", "12345678'", "B0+1900", "B0+1950", "B1982", "0'", "0'", "0'", "F100", "D", "DX113", "E120"]
   mem1 = memory.Memory()
   
   for index, cmd in enumerate(program):

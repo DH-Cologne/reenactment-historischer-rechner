@@ -334,6 +334,9 @@ class Befehl(Wort):
                 self.isJumpOrCall = True
                 operation[9] = 0
                 operation[10] = 0
+            if o.__contains__('I'):
+                operation[9] = 1
+                operation[10] = 1
 
         return operation
 
@@ -457,6 +460,13 @@ class Ganzzahl(Wort):
 
     def getInt(self) -> int:
         return int(self.strWort)
+    
+    
+    def __int__(self) -> int:
+        """
+        This allows using int() on a Ganzzahl object
+        """
+        return self.getInt()
 
 
 if __name__ == '__main__':
@@ -473,6 +483,8 @@ if __name__ == '__main__':
     w11 = parse('CA1')
     w12 = parse('1\'')
     w13 = parse('1\'')
+    w14 = parse('I1')
+
 
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
@@ -484,6 +496,7 @@ if __name__ == '__main__':
     print('Typ von String {} ist {}'.format(w8.strWort, type(w8)))
     print('Typ von String {} ist {}'.format(w12.strWort, type(w12)))
     print('Typ von String {} ist {}'.format(w13.strWort, type(w13)))
+    print('Typ von String {} ist {}'.format(w14.strWort, type(w14)))
 
     print(w1.getBinary())
     print(parseBinary(w1.getBinary()))
@@ -524,6 +537,9 @@ if __name__ == '__main__':
 
     print(w13.getBinary())
     print(parseBinary(w13.getBinary()))
+
+    print(w14.getBinary())
+    print(parseBinary(w14.getBinary()))
 
     # # checken, ob _parseKlartext binär --> String funktioniert
     # w4 = parse('ALT')
