@@ -15,8 +15,11 @@ def parse(input):
     if type(input) == str:
         input.strip()
         wort = input
+        # check empty string -- and store as 0
+        if wort == "":
+          obj = Ganzzahl(0)
         # check Strichzahl
-        if wort[-1] == '\'':
+        elif wort[-1] == '\'':
             obj = Ganzzahl(input[0:-1])
         elif wort == '0':
             obj = Ganzzahl(input)
