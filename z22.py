@@ -1,6 +1,5 @@
 import input_output
 import cpu
-import memory
 from sys import argv
 
 filePath =argv[1]
