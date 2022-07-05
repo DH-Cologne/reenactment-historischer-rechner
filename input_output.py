@@ -4,7 +4,7 @@ import re
 import csv
 from prettytable import PrettyTable
 
-#import memory
+import memory as mem
 #import wort
 
 
@@ -20,7 +20,8 @@ class IoMemory:
         for speicherzelle, speicherinhalt in memory_dict.items():
             memory_dict[speicherzelle] = speicherinhalt.strWort
 
-
+        # NR: I'm getting this error:
+        # AttributeError: 'list' object has no attribute 'add'
         self.memory_list.add(memory_dict)
     # mehrere Steps?
     def printMemory(self,  current_step:int, mode="all", output="console", old_step: int=None ):
@@ -88,7 +89,7 @@ def readProgram(txt):
     '''
     reads in the program, saves it into the memory and executes Bandbefehle
     '''
-    memory = memory.Memory()
+    memory = mem.Memory()
 
     # Abwandlung von bandbefehle.py
 
@@ -127,7 +128,7 @@ def readProgram(txt):
                 if "+" in line:
                     input("Press Start to continue...")
                 else: 
-                    startingPoint = line
+                    startingPoint = int(m.group(1))
             
         
             
