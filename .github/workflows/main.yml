@@ -26,4 +26,7 @@ jobs:
 
       - name: Run testMemory.py
         run: python3 testMemory.py
+      
+      - name: Run testIO.py
+        run: python3 testIO.py
 
