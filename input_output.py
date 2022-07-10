@@ -16,13 +16,15 @@ class IoMemory:
         '''
         saves the current status of the memory into a list
         '''
+        if type(memory) != mem.Memory:
+            raise Exception(f"Type {type(memory)} can't be collected") 
         memory_dict = memory.getAll()
         for speicherzelle, speicherinhalt in memory_dict.items():
             memory_dict[speicherzelle] = speicherinhalt.strWort
 
         # NR: I'm getting this error:
         # AttributeError: 'list' object has no attribute 'add'
-        self.memory_list.add(memory_dict)
+        self.memory_list.append(memory_dict)
     # mehrere Steps?
     def printMemory(self,  current_step:int, mode="all", output="console", old_step: int=None ):
         '''
@@ -36,6 +38,8 @@ class IoMemory:
         old_step (int) = The step to which the changes should be compared
         
         '''
+        
+
         if mode=="all":
             memory_output = []
             for speicherzelle, speicherinhalt in self.memory_list[current_step].items():
@@ -56,12 +60,15 @@ class IoMemory:
                 table.add_rows(memory_output)
 
                 print(table)     
+            
+            return memory_output
         
         elif mode =="changes":
             memory_change = []
             if old_step == None:
                 raise ValueError("Missing old_step parameter")
-
+            elif current_step < old_step: 
+                raise Exception('The current_step has to be bigger than the old_step')
             for speicherzelle, new_speicherinhalt in self.memory_list[current_step].items():
                 try:
                     old_speicherinhalt = self.memory_list[old_step][speicherzelle]
@@ -83,6 +90,7 @@ class IoMemory:
                 table.add_rows(memory_change)
 
                 print(table)
+            return memory_change
         
     
 def readProgram(txt):
@@ -126,7 +134,8 @@ def readProgram(txt):
             m = re_exxxxe.match(line)
             if m:
                 if "+" in line:
-                    input("Press Start to continue...")
+                    #input("Press Start to continue...")
+                    continue
                 else: 
                     startingPoint = int(m.group(1))
             
@@ -164,30 +173,5 @@ if __name__ == '__main__':
             
         }
         ]
-    io.printMemory(current_step=1, mode="changes", output="csv", old_step=0)
+    print(io.printMemory(current_step=1, mode="changes", output="csv", old_step=0))
 
-
-# Tests: pseudo Speicher übergeben
-# io.memory_list=[
-#         {
-#             "1": "23",
-#             "2": "24",
-#             "3": "25",
-#             "4": "25",
-#             "5": "25",
-#             "6": "25",
-#             "7": "25",
-#         },
-#         {
-#             "1": "25",
-#             "2": "25",
-#             "3": "25",
-#             "4": "25",
-#             "5": "25",
-#             "6": "25",
-#             "7": "25",
-            
-#         }
-#         ]
-
-# Test valider Programminput
