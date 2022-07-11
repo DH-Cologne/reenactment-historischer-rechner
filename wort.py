@@ -13,8 +13,9 @@ def parse(input):
     """
     obj = None
     if type(input) == str:
-        input.strip()
-        wort = input
+        # keine Leerzeichen in Stringrepräsentation
+        wort = input.strip()
+        pattern = re.compile('[A-Z.]+') # Klartext checken
         # check empty string -- and store as 0
         if wort == "":
           obj = Ganzzahl(0)
@@ -24,7 +25,7 @@ def parse(input):
         elif wort == '0':
             obj = Ganzzahl(input)
         # check Klartext (lexikalisches Wort)
-        elif not bool(re.search(r'\d', wort)) and wort != 'D':
+        elif pattern.fullmatch(wort) is not None and wort != 'D':
             obj = Klartext(input)
         # check Befehl
         elif (bool(re.search(r'\d', wort)) and bool(re.search('[A-Z]', wort))) or wort == 'D':
@@ -44,15 +45,16 @@ def parseBinary(binary):
     :param binary: Wort als Binärrepräsentation
     :return: Objekt des jeweiligen Typs
     """
-
+    if len(binary) != 38:
+        raise Exception(f"Input {binary} hat nicht die vorgegebene Länge von 38 bits")
     if binary[0] == binary[1]:
         return _parseGanzzahl(binary)
-
     elif binary[0] == 1:
         return _parseBefehl(binary)
-
     elif binary[0] == 0:
         return _parseKlartext(binary)
+    else:
+        raise Exception(f"Objekttyp für Input {binary} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
 
 
 def _parseGanzzahl(binary):
@@ -153,7 +155,7 @@ def _parseKlartext(binary):
     with StringIO(tape) as code_stream:
         reader = handlers.TapeReader(code_stream)
         decoded = decode_to_str(reader, codecs.ITA2_STANDARD)
-    return decoded
+    return parse(decoded)
 
 
 def _binaryToTape(bin_word):
@@ -184,6 +186,7 @@ def _binaryToTape(bin_word):
                 raise Exception(f"Binärwort {bin_word} enthält Elemente, die nicht 0 oder 1 sind")
         tape_encoded += '\n'
     return(tape_encoded)
+
 
 class Wort:
     def __init__(self, strWort: str):
@@ -391,9 +394,12 @@ class Befehl(Wort):
 
 class Klartext(Wort):
     def __init__(self, strWort: str):
-        super().__init__(strWort)
+        # keine Leerzeichen in Stringrepräsentation
+        strWort = strWort.strip()
+        # wenn Wortlänge > 6, Rest abschneiden
         if len(strWort) > 6:
-            raise Exception(f"Wort {strWort} überschreitet die maximale Länge von 6 Zeichen")
+            strWort = strWort[:6]
+        super().__init__(strWort)
 
     def getBinary(self) -> list:
         """
@@ -407,7 +413,7 @@ class Klartext(Wort):
         # Umschalter Bit ändern nur bei Punkt
         if wort == '.':
             binary[2] = 1
-        # 1 Leerzeichen anhängen
+        # 1 Leerzeichen anhängen für Binärrepräsentation
         wort += ' '
         # baudot encodieren des Wortes
         baudot_wort = self._baudotEncode(wort)
@@ -488,7 +494,7 @@ if __name__ == '__main__':
     w10 = parse('-7\'')
     w11 = parse('CA1')
     w12 = parse('1\'')
-    w13 = parse('1\'')
+    w13 = parse(1)
     w14 = parse('I1')
 
 
@@ -511,6 +517,7 @@ if __name__ == '__main__':
     print(parseBinary(w2.getBinary()))
 
 
+    print(w4)
     print(w4.getBinary())
     print(w5.getBinary())
     print(w6.getBinary())

@@ -86,6 +86,83 @@ class MemoryTest(unittest.TestCase):
         self.assertEqual(wort.parseBinary(w8.getBinary()).strWort, w8.strWort)
         self.assertIsInstance(wort.parseBinary(w8.getBinary()), wort.Befehl)
 
+    # Überprüfung parse() Methode für alle möglichen Inputs
+    def testParse(self):
+        input1 = '' # empty string --> Ganzzahl 0
+        self.assertIsInstance(wort.parse(input1), wort.Ganzzahl)
+        input2 = '1\'' # Ganzzahl
+        self.assertIsInstance(wort.parse(input2), wort.Ganzzahl)
+        input3 = '0' # Ganzzahl
+        self.assertIsInstance(wort.parse(input3), wort.Ganzzahl)
+        input14 = 1  # Ganzzahl
+        self.assertIsInstance(wort.parse(input14), wort.Ganzzahl)
+        input4 = '-7\''  # Ganzzahl
+        self.assertIsInstance(wort.parse(input4), wort.Ganzzahl)
+        input5 = 'SCHLOS' # Klartext
+        self.assertIsInstance(wort.parse(input5), wort.Klartext)
+        input6 = 'ALT' # Klartext
+        self.assertIsInstance(wort.parse(input6), wort.Klartext)
+        input7 = '.'  # Klartext
+        self.assertIsInstance(wort.parse(input7), wort.Klartext)
+        input8 = 'KARTOFFEL' # Klartext (wird abgeschnitten)
+        self.assertIsInstance(wort.parse(input8), wort.Klartext)
+        input9 = 'B0+1900' # Befehl
+        self.assertIsInstance(wort.parse(input9), wort.Befehl)
+        input10 = 'D' # Befehl
+        self.assertIsInstance(wort.parse(input10), wort.Befehl)
+        input11 = 'I1' # Befehl
+        self.assertIsInstance(wort.parse(input11), wort.Befehl)
+        input12 = '%%%' # parse nicht möglich --> Exception
+        self.assertRaises(Exception, wort.parse, input12)
+        input13 = 'καλημέρα'  # parse nicht möglich --> Exception
+        self.assertRaises(Exception, wort.parse, input13)
+
+    # parseBinary Methode überprüfen für alle Objekttypen
+    def testParseBinary(self):
+        bin1 = [0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0]
+        self.assertIsInstance(wort.parseBinary(bin1), wort.Klartext)
+        bin2 = [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0]
+        self.assertIsInstance(wort.parseBinary(bin2), wort.Befehl)
+        bin3 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+        self.assertIsInstance(wort.parseBinary(bin3), wort.Ganzzahl)
+        bin4 = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
+        self.assertIsInstance(wort.parseBinary(bin4), wort.Ganzzahl)
+        bin5 = [5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
+        self.assertRaises(Exception, wort.parseBinary, bin5)
+        bin6 = [1, 1, 1, 0, 0]
+        self.assertRaises(Exception, wort.parseBinary, bin6)
+
+    # getBinary Funktion von Klartext Klasse überprüfen
+    def testKlartextGetBinary(self):
+        w1 = wort.parse('SCHLOS')
+        self.assertEqual([0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0,
+                          1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0],
+                         w1.getBinary())
+        w2 = wort.parse('ALT')
+        self.assertEqual([0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0,
+                          0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         w2.getBinary())
+        w3 = wort.parse('.')
+        self.assertEqual([0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         w3.getBinary())
+        w4 = wort.parse('KARTOFFEL') # wird abgeschnitten
+        self.assertEqual([0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0,
+                          1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0],
+                         w4.getBinary())
+
+    # Binary --> Klartext Funktion überprüfen
+    def testParseKlartext(self):
+        w1 = wort.parse('SCHLOS')
+        self.assertEqual(wort.parseBinary(w1.getBinary()).strWort, w1.strWort)
+        self.assertIsInstance(wort.parseBinary(w1.getBinary()), wort.Klartext)
+        w2 = wort.parse('ALT')
+        self.assertEqual(wort.parseBinary(w2.getBinary()).strWort, w2.strWort)
+        self.assertIsInstance(wort.parseBinary(w2.getBinary()), wort.Klartext)
+        w3 = wort.parse('.')
+        self.assertEqual(wort.parseBinary(w3.getBinary()).strWort, w3.strWort)
+        self.assertIsInstance(wort.parseBinary(w3.getBinary()), wort.Klartext)
+
 
 if __name__ == '__main__':
     unittest.main()

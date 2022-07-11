@@ -1,12 +1,16 @@
+import wort
+#import input_output
 class ResultPrinter:
     def __init__(self):
         self.strToPrint =""
 
     def collectPrint(self, accumulator):
         '''adds the accumulator to strToPrint'''
+        if isinstance(accumulator, wort.Wort) == False:
+            raise Exception (f"{type(accumulator)} can't be collected")
         self.strToPrint += accumulator.strWort + "\n"
 
-        pass
+        
     def printAll(self, mode="console"):
         '''
         prints content of strToPrint into a text file
@@ -23,5 +27,9 @@ class ResultPrinter:
                
 
 
-# Test accumulator Klasse Wort
-#
+# if __name__ == '__main__':
+    # memory, startingPoint = input_output.readProgram("data/texte.z22")
+    # rp = ResultPrinter()
+    # print(type(memory.get(1720)))
+    # rp.collectPrint(memory.get(1720))
+    # rp.printAll()
