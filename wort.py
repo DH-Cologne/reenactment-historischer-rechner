@@ -470,6 +470,9 @@ class Ganzzahl(Wort):
         This allows using int() on a Ganzzahl object
         """
         return self.getInt()
+        
+    def toBefehl(self):
+        pass
 
 
 if __name__ == '__main__':
@@ -507,8 +510,6 @@ if __name__ == '__main__':
     print(w2.getBinary())
     print(parseBinary(w2.getBinary()))
 
-    print(w3.getBinary())
-    print(parseBinary(w3.getBinary()))
 
     print(w4.getBinary())
     print(w5.getBinary())
@@ -543,6 +544,9 @@ if __name__ == '__main__':
 
     print(w14.getBinary())
     print(parseBinary(w14.getBinary()))
+
+    print(w3.getBinary())
+    print(parseBinary(w3.getBinary()))
 
     # # checken, ob _parseKlartext binär --> String funktioniert
     # w4 = parse('ALT')

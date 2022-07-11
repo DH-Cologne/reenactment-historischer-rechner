@@ -3,6 +3,7 @@ import os.path
 import re
 import csv
 from prettytable import PrettyTable
+import copy
 
 import memory as mem
 #import wort
@@ -16,13 +17,11 @@ class IoMemory:
         '''
         saves the current status of the memory into a list
         '''
-        memory_dict = memory.getAll()
+        memory_dict = copy.deepcopy(memory.getAll())
         for speicherzelle, speicherinhalt in memory_dict.items():
             memory_dict[speicherzelle] = speicherinhalt.strWort
 
-        # NR: I'm getting this error:
-        # AttributeError: 'list' object has no attribute 'add'
-        self.memory_list.add(memory_dict)
+        self.memory_list.append(memory_dict)
     # mehrere Steps?
     def printMemory(self,  current_step:int, mode="all", output="console", old_step: int=None ):
         '''

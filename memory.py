@@ -27,7 +27,7 @@ class Memory:
         """ Saves word as object of class Wort in given cell """
 
         # if string parse string to object of class Wort
-        if type(word) == str:
+        if type(word) == str or type(word) == int:
             if zelle in list(self.memory.keys()):
                 self.memory[zelle] = wort.parse(word)
             else:

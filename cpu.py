@@ -53,7 +53,10 @@ class CPU:
     # Execute it
     # (This will need to be partially reimplemented once we have a new representation of the commands)
     
-    self._log("CPU executes step ", self.currentStep)
+    # Uncomment after bug is fixed
+    self.iomemory.collectMemory(self.memory)
+    
+    self._log("==== CPU executes step ", self.currentStep, " ====")
     self._log("CPU status: b=",str(self._b()), ", c=",str(self._c()), ", a=", self._a())
     
     if a != None:
@@ -65,7 +68,7 @@ class CPU:
 
     # 1. Parse the command (to be replaced by other code)
     # if its a 0 or "0", we set befehl and address to 0
-    try: 
+    try:
       befehl = self._b().getBinary() # , address, trommel = self._parseCommand(self._b())
     except SyntaxError:
       self._log("Syntax error: ", self._b())
@@ -83,6 +86,7 @@ class CPU:
     if self._applyConditions(befehl):
       if self._b().isJumpOrCall:
         if self._chk(befehl, 'F'):
+          print(befehl)
           # check for calls of the operating system
           if self._trommel(self._b()) == 644:
             print(self._a())
@@ -98,7 +102,7 @@ class CPU:
         self._b(self.memory.get(operands[1]))
         self._c("E" + str(operands[1]+1))
         
-      
+        # self.iomemory.printMemory(self.currentStep, mode="changes", old_step=self.currentStep-1)
         self._log("CPU status after: b=",str(self._b()), ", c=",str(self._c()), ", a=", self._a())
         self._log("Done with step ", self.currentStep)
         self.currentStep += 1
@@ -120,7 +124,8 @@ class CPU:
         self._a(int(self._a()) & operands[1])
       # A
       elif self._chk(befehl, 'A'):
-        self._a(int(self._a()) + operands[1])
+        # make binary addition
+        self._a(   int(  self._a()  ) + operands[1]    )
       # U
       elif self._chk(befehl, 'U'):
         self.memory.set(operands[1], self._a())
@@ -129,11 +134,14 @@ class CPU:
     
     # 3. ... and put the command for getting the next command into the Befehlsregister
     self._b(self._c())
-    self.currentStep += 1
+
+    self.iomemory.printMemory(self.currentStep, mode="changes", old_step=0)
     
     # finally, some logging
     self._log("CPU status after: b=",str(self._b()), ", c=",str(self._c()), ", a=", self._a())
     self._log("Done with step ", self.currentStep)
+
+    self.currentStep += 1
   
   def _chk(self, befehl, btype) -> bool:
     try:
@@ -195,8 +203,8 @@ class CPU:
   def _a(self, value = None):
     """ Easier set and get access to the accumulator """
     if value:
-      if type(value) == int:
-        value = str(value)+"'"
+      #if type(value) == int:
+      #  value = str(value)+"'"
       self.memory.set(4, value)
     else:
       return self.memory.get(4)

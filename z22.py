@@ -7,5 +7,5 @@ memory, startingPoint = input_output.readProgram(filePath)
 
 iomemory = input_output.IoMemory()
 
-cpu = cpu.CPU(memory, iomemory, verbose=True)
-cpu.startAt(startingPoint, maxSteps=20)
+cpu = cpu.CPU(memory, iomemory, verbose=False)
+cpu.startAt(startingPoint)
