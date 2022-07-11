@@ -1,6 +1,7 @@
 import re
 import memory
 import wort
+from input_output import IoMemory
 
 Befehle = {
   'PP': 2,
@@ -78,9 +79,9 @@ class CPU:
     
     ## 2. Now we have parsed, we execute the commands.
     
-    operands = [self._a(), max(self._schnell(self._b()), self._trommel(self._b()))]
+    operands = [self._a(), self.memory.get(max(self._schnell(self._b()), self._trommel(self._b())))]
     if self._chk(befehl, 'C'): 
-      operands[1] = dec(befehl[20:38])
+      operands[1] = self.memory.get(dec(befehl[20:38]))
     
     # Sprungbefehle E and F
     if self._applyConditions(befehl):
@@ -125,7 +126,7 @@ class CPU:
       # A
       elif self._chk(befehl, 'A'):
         # make binary addition
-        self._a(   int(  self._a()  ) + operands[1]    )
+        self._a(   int(self._a()) + int(operands[1])    )
       # U
       elif self._chk(befehl, 'U'):
         self.memory.set(operands[1], self._a())
@@ -135,7 +136,8 @@ class CPU:
     # 3. ... and put the command for getting the next command into the Befehlsregister
     self._b(self._c())
 
-    self.iomemory.printMemory(self.currentStep, mode="changes", old_step=0)
+    if self.currentStep > 0:
+      self.iomemory.printMemory(self.currentStep, mode="changes", old_step=self.currentStep-2)
     
     # finally, some logging
     self._log("CPU status after: b=",str(self._b()), ", c=",str(self._c()), ", a=", self._a())
@@ -254,6 +256,6 @@ if __name__=="__main__":
   print(mem1.getAll())
   # mem1 = [0 for x in range(0,130)]
   # mem1[100:113] = ["B5", "T112", "B113", "LLA0", "LLA0", "A113", "RA0", "RA0", "RA0", "RA0", "U113", "CI15", 0, 12345678, "B0+1900", "B0+1950", "B1982", 0, 0, 0, "F100", "D", "DX113", "E120"]
-  cpu = CPU(mem1, None, verbose=True, interactive=False)
+  cpu = CPU(mem1, IoMemory(), verbose=True, interactive=False)
   # cpu.printMemory()
   cpu.startAt(120, maxSteps=1000)
