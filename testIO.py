@@ -72,9 +72,9 @@ class IOtest(unittest.TestCase):
     def testReadingInProgram(self):
         memory, startingPoint = input_output.readProgram(self.test_file_path)
         # testing if the returned objects are correct
-        self.assertIsInstance (memory, m.Memory)
-        self.assertIsInstance (startingPoint, int)
-        self.assertIsInstance (memory.get(startingPoint), wort.Wort)
+        self.assertIsInstance(memory, m.Memory)
+        self.assertIsInstance(startingPoint, int)
+        self.assertIsInstance(memory.get(startingPoint), wort.Wort)
 
     def testCollectingMemory(self):
         memory, startingPoint = input_output.readProgram(self.test_file_path)
@@ -97,7 +97,16 @@ class IOtest(unittest.TestCase):
         self.assertRaises(Exception, printer.collectPrint, 12)
         self.assertRaises(Exception, printer.collectPrint, "String")
 
-    
+        # testing exceptions that are risen when "mode" args are incorrect
+        self.assertRaises(Exception, printer.printAll, "pdf")
+        self.assertRaises(Exception, printer.printAll, 1)
+
+        resultstring = printer.strToPrint
+        # Minimum characters of Theo Lutz' result text
+        comparable = 2200
+        # Testing if the result string has a certain length of characters
+        self.assertLess(comparable < len(resultstring))
+
 if __name__ == '__main__':
 
  unittest.main()
