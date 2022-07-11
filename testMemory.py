@@ -127,10 +127,16 @@ class MemoryTest(unittest.TestCase):
         self.assertIsInstance(wort.parseBinary(bin3), wort.Ganzzahl)
         bin4 = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
         self.assertIsInstance(wort.parseBinary(bin4), wort.Ganzzahl)
+        # Input enthält ungültige Werte
         bin5 = [5, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]
         self.assertRaises(Exception, wort.parseBinary, bin5)
+        # Input zu kurz
         bin6 = [1, 1, 1, 0, 0]
         self.assertRaises(Exception, wort.parseBinary, bin6)
+        # Input zu lang
+        bin7 = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                1, 1, 1, 1, 0]
+        self.assertRaises(Exception, wort.parseBinary, bin7)
 
     # getBinary Funktion von Klartext Klasse überprüfen
     def testKlartextGetBinary(self):
@@ -162,6 +168,33 @@ class MemoryTest(unittest.TestCase):
         w3 = wort.parse('.')
         self.assertEqual(wort.parseBinary(w3.getBinary()).strWort, w3.strWort)
         self.assertIsInstance(wort.parseBinary(w3.getBinary()), wort.Klartext)
+
+    def testParseGanzzahl(self):
+        w1 = wort.parse('0')
+        self.assertEqual(wort.parseBinary(w1.getBinary()).strWort, w1.strWort)
+        self.assertIsInstance(wort.parseBinary(w1.getBinary()), wort.Ganzzahl)
+        w2 = wort.parse('7\'')
+        self.assertEqual(wort.parseBinary(w2.getBinary()).strWort, w2.strWort)
+        self.assertIsInstance(wort.parseBinary(w2.getBinary()), wort.Ganzzahl)
+        w3 = wort.parse('-7\'')
+        self.assertEqual(wort.parseBinary(w3.getBinary()).strWort, w3.strWort)
+        self.assertIsInstance(wort.parseBinary(w3.getBinary()), wort.Ganzzahl)
+        w4 = wort.parse(0)
+        self.assertEqual(wort.parseBinary(w4.getBinary()).strWort, w4.strWort)
+        self.assertIsInstance(wort.parseBinary(w4.getBinary()), wort.Ganzzahl)
+        w5 = wort.parse(1)
+        self.assertEqual(wort.parseBinary(w5.getBinary()).strWort, w5.strWort)
+        self.assertIsInstance(wort.parseBinary(w5.getBinary()), wort.Ganzzahl)
+        # w6 = wort.parse('1256782340891236\'')
+        # self.assertRaises(Exception, wort.Ganzzahl, w6)
+        w6 = wort.parse('12567823408\'')
+        self.assertRaises(Exception, wort.Ganzzahl, w6)
+        w7 = wort.parse('-1256\'')
+        self.assertRaises(Exception, wort.Ganzzahl, w7)
+        # w8 = wort.parse('1.9\'')
+        # self.assertRaises(Exception, wort.Ganzzahl, w8)
+        w9 = wort.parse('1.0\'')
+        self.assertRaises(Exception, wort.parseBinary, w9)
 
 
 if __name__ == '__main__':

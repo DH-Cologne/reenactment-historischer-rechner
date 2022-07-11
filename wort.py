@@ -470,15 +470,11 @@ class Ganzzahl(Wort):
     def getInt(self) -> int:
         return int(self.strWort)
     
-    
     def __int__(self) -> int:
         """
         This allows using int() on a Ganzzahl object
         """
         return self.getInt()
-        
-    def toBefehl(self):
-        pass
 
 
 if __name__ == '__main__':
@@ -497,7 +493,6 @@ if __name__ == '__main__':
     w13 = parse(1)
     w14 = parse('I1')
 
-
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
     print('Typ von String {} ist {}'.format(w3.strWort, type(w3)))
@@ -515,7 +510,6 @@ if __name__ == '__main__':
 
     print(w2.getBinary())
     print(parseBinary(w2.getBinary()))
-
 
     print(w4)
     print(w4.getBinary())
