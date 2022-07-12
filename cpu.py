@@ -224,8 +224,6 @@ class CPU:
   def _a(self, value = None):
     """ Easier set and get access to the accumulator """
     if value:
-      #if type(value) == int:
-      #  value = str(value)+"'"
       self.memory.set(4, value)
     else:
       return self.memory.get(4)
