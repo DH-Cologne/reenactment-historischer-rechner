@@ -82,12 +82,14 @@ class CPU:
     
     ## 2. Now we have parsed, we execute the commands.
 
-    addresses = [self._schnell(self._b()), self._trommel(self._b()) ]
+    addresses = [ self._schnell(self._b()), self._trommel(self._b()) ]
     contents = [ self.memory.get(x) for x in addresses ]
     # self._log("Schnell parsed into: ", contents[0].bstr(split=True))
     # self._log("Trommel parsed into: ", contents[1].bstr(split=True))
+    
     binaryOperand = xbin(dec(contents[0].getBinary()) | dec(contents[1].getBinary()))
     # print(binaryOperand)
+    
     operand = wort.parseBinary(binaryOperand)
     # self._log("Operand parsed into: ", operand.bstr(split=True), ": ", str(operand))
     #address = max(self._schnell(self._b()), self._trommel(self._b()))
@@ -100,7 +102,9 @@ class CPU:
     if self._applyConditions(befehl):
       # C
       if self._chk(befehl, 'C'): 
-        operand = wort.parse(str(dec(befehl[20:38]))+"'")
+        binaryOperand = xbin(addresses[0] | addresses[1])
+        
+        operand = wort.parseBinary(binaryOperand)
       self._log("Operand parsed into: ", operand.bstr(split=True), ": ", str(operand))
         
       # LL
