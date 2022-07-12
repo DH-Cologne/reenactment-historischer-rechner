@@ -115,7 +115,7 @@ def _parseBefehl(binary):
 
     # Zusammenfügen der Befehls- und Speicherstrings
     # Schnell- und Trommelspeicher
-    if trommelspeicher >= 32 and schnellspeicher < 32:
+    if trommelspeicher >= 0 and schnellspeicher < 32:
         # Schnellspeicher ist 0
         if schnellspeicher == 0:
             # Sonderfall Befehl B<s>+<t>
@@ -244,6 +244,9 @@ class Befehl(Wort):
         # wenn die Operation == D ist, dann wird die Speicherzelle auf 644 gesetzt
         if operations.__contains__('D'):
             b = format(644, 'b')
+            speicher = ([0] * 5) + (([0] * (13 - len(b))) + (list(map(int, list(b)))))
+        elif operation[5] == 1:
+            b = [int(x) for x in (bin(max([int(a) for a in adressen]))[2:])]
             speicher = ([0] * 5) + (([0] * (13 - len(b))) + (list(map(int, list(b)))))
         # in allen anderen Fällen wird der String in eine Binärzahl umgewandelt
         else:
