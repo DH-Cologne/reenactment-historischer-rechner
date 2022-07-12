@@ -79,7 +79,7 @@ class CPU:
       self._log("Syntax error: ", self._b())
       befehl = [0]
     
-    self._log("Command parsed into: ", wort.parseBinary(befehl))
+    self._log("Command parsed into: ", self._b().bstr(), ": ", wort.parseBinary(befehl))
     
     ## 2. Now we have parsed, we execute the commands.
     
