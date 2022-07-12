@@ -99,10 +99,10 @@ class CPU:
         self._a(wort.parse([0] + self._a().getBinary()[0:-1]))
       
       if self._applyOSCommand(befehl):
-            pass
+        pass
       elif self._chk(befehl, 'F') or (not self._chk(befehl, 'A') and not self._chk(befehl, 'U')):
         if self._chk(befehl, 'F'):
-            self.memory.set(5, self._c())
+          self.memory.set(5, self._c())
         self._c("E" + str(address+1))
         self._b(operands[1])
         
@@ -111,28 +111,36 @@ class CPU:
         self._log("Done with step ", self.currentStep)
         self.currentStep += 1
         return
+        
+        
+      
       elif self._chk(befehl, 'N') and self._chk(befehl, 'A'):
-        self._a(self.memory.get(operands[1]))
+        self._a(operands[1])
       # T
       elif self._chk(befehl, 'N') and self._chk(befehl, 'U'):
-        self.memory.set(operands[1], self._a())
+        self.memory.set(address, self._a())
         self._a(0)
-      # LLA
-      elif self._chk(befehl, 'LL') and self._chk(befehl, 'A'):
-        self._a((self._a().getInt() << 2) + operands[1])
-      # RA
-      elif self._chk(befehl, 'R') and self._chk(befehl, 'A'):
-        self._a((self._a().getInt() >> 1) + operands[1])
       # UA = I
       elif self._chk(befehl, 'U') and self._chk(befehl, 'A'):
-        self._a(int(self._a()) & operands[1])
+        o1 = dec(self._a().getBinary())
+        if isinstance(operands[1], wort.Wort):
+          o2 = dec(operands[1].getBinary())
+        elif type(operands[1]) == int:
+          o2 = operands[1]
+        self._a(wort.parseBinary(xbin(o1 & o2)))
       # A
       elif self._chk(befehl, 'A'):
         # make binary addition
-        self._a(   int(self._a()) + int(operands[1])    )
+        o1 = dec(self._a().getBinary())
+        if isinstance(operands[1], wort.Wort):
+          o2 = dec(operands[1].getBinary())
+        elif type(operands[1]) == int:
+          o2 = operands[1]
+        sum = o1 + o2
+        self._a(wort.parseBinary(xbin(sum)[-38:]))
       # U
       elif self._chk(befehl, 'U'):
-        self.memory.set(operands[1], self._a())
+        self.memory.set(address, self._a())
     else:
       self._log("Condition not fulfilled.")
     
