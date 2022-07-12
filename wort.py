@@ -18,7 +18,7 @@ def parse(input):
         pattern = re.compile('[A-Z.]+') # Klartext checken
         # check empty string -- and store as 0
         if wort == "":
-          obj = Ganzzahl(0)
+          obj = Ganzzahl("0")
         # check Strichzahl
         elif wort[-1] == '\'':
             obj = Ganzzahl(input[0:-1])
