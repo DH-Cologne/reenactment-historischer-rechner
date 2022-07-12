@@ -454,9 +454,10 @@ class Ganzzahl(Wort):
 
     def __init__(self, strWort):
 
-        if strWort.__contains__('.'):
-            raise Exception(f"Float {strWort} is out of bound.")
-        elif abs(int(strWort)) > (2 ** 35) - 1:
+        if type(strWort) != int:
+            if strWort.__contains__('.'):
+                raise Exception(f"Float {strWort} is out of bound.")
+        if abs(int(strWort)) > (2 ** 35) - 1:
             raise Exception(f"Strichzahl {int(strWort)} is out of bound.")
         else:
             super().__init__(strWort)
