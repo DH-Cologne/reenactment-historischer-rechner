@@ -83,9 +83,8 @@ class CPU:
     
     ## 2. Now we have parsed, we execute the commands.
     
-    operands = [self._a(), self.memory.get(max(self._schnell(self._b()), self._trommel(self._b())))]
-    if self._chk(befehl, 'C'): 
-      operands[1] = self.memory.get(dec(befehl[20:38]))
+    address = max(self._schnell(self._b()), self._trommel(self._b()))
+    operands = [self._a(), self.memory.get(address)]
     
     # Sprungbefehle E and F
     if self._applyConditions(befehl):
