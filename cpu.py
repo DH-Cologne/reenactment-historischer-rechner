@@ -77,68 +77,83 @@ class CPU:
       self._log("Syntax error: ", self._b())
       befehl = [0]
     
-    self._log("Command parsed into: ", self._b().bstr(), ": ", wort.parseBinary(befehl))
+    self._log("Command parsed into: ", self._b().bstr(split=True), ": ", wort.parseBinary(befehl))
+    self._log("                              CNLRUASFKHZGV")
     
     ## 2. Now we have parsed, we execute the commands.
+
+    addresses = [self._schnell(self._b()), self._trommel(self._b()) ]
+    contents = [ self.memory.get(x) for x in addresses ]
+    # self._log("Schnell parsed into: ", contents[0].bstr(split=True))
+    # self._log("Trommel parsed into: ", contents[1].bstr(split=True))
+    binaryOperand = xbin(dec(contents[0].getBinary()) | dec(contents[1].getBinary()))
+    # print(binaryOperand)
+    operand = wort.parseBinary(binaryOperand)
+    # self._log("Operand parsed into: ", operand.bstr(split=True), ": ", str(operand))
+    #address = max(self._schnell(self._b()), self._trommel(self._b()))
+    #operands = [self._a(), self.memory.get(address)]
     
-    address = max(self._schnell(self._b()), self._trommel(self._b()))
-    operands = [self._a(), self.memory.get(address)]
     
+    # 10 00000 0000000100000
+    #                 
     # Sprungbefehle E and F
     if self._applyConditions(befehl):
       # C
       if self._chk(befehl, 'C'): 
-        operands[1] = dec(befehl[20:38])
+        operand = wort.parse(str(dec(befehl[20:38]))+"'")
+      self._log("Operand parsed into: ", operand.bstr(split=True), ": ", str(operand))
+        
       # LL
       if self._chk(befehl, 'LL'):
-        self._a(wort.parse(self._a().getBinary()[2:] + [0,0]))
+        self._a(wort.parseBinary(self._a().getBinary()[2:] + [0,0]))
       # R
       if self._chk(befehl, 'R'):
-        self._a(wort.parse([0] + self._a().getBinary()[0:-1]))
+        self._a(wort.parseBinary([0] + self._a().getBinary()[0:-1]))
       
       if self._applyOSCommand(befehl):
         pass
-      elif self._chk(befehl, 'F') or (not self._chk(befehl, 'A') and not self._chk(befehl, 'U')):
+      elif (not self._chk(befehl, 'A') and (not self._chk(befehl, 'U'))):
         if self._chk(befehl, 'F'):
           self.memory.set(5, self._c())
-        self._c("E" + str(address+1))
-        self._b(operands[1])
+        self._b(operand)
+        self._c("E" + str(addresses[1]+1))
         
-        # self.iomemory.printMemory(self.currentStep, mode="changes", old_step=self.currentStep-1)
+        self.iomemory.collectMemory(self.memory)
+        
+        self.iomemory.printMemory(self.currentStep, mode="changes", old_step=self.currentStep-1)
         self._log("CPU status after: b=",str(self._b()), ", c=",str(self._c()), ", a=", self._a())
         self._log("Done with step ", self.currentStep)
         self.currentStep += 1
         return
-        
-        
       
       elif self._chk(befehl, 'N') and self._chk(befehl, 'A'):
-        self._a(operands[1])
+        self._a(operand)
       # T
       elif self._chk(befehl, 'N') and self._chk(befehl, 'U'):
-        self.memory.set(address, self._a())
+        self.memory.set(max(addresses), self._a())
         self._a(0)
       # UA = I
       elif self._chk(befehl, 'U') and self._chk(befehl, 'A'):
         o1 = dec(self._a().getBinary())
-        if isinstance(operands[1], wort.Wort):
-          o2 = dec(operands[1].getBinary())
-        elif type(operands[1]) == int:
-          o2 = operands[1]
+        if isinstance(operand, wort.Wort):
+          o2 = dec(operand.getBinary())
+        elif type(operand) == int:
+          o2 = operand
         self._a(wort.parseBinary(xbin(o1 & o2)))
       # A
       elif self._chk(befehl, 'A'):
         # make binary addition
         o1 = dec(self._a().getBinary())
-        if isinstance(operands[1], wort.Wort):
-          o2 = dec(operands[1].getBinary())
-        elif type(operands[1]) == int:
-          o2 = operands[1]
+        if isinstance(operand, wort.Wort):
+          o2 = dec(operand.getBinary())
+        elif type(operand) == int:
+          o2 = operand
         sum = o1 + o2
         self._a(wort.parseBinary(xbin(sum)[-38:]))
       # U
       elif self._chk(befehl, 'U'):
-        self.memory.set(address, self._a())
+        self.memory.set(addresses[0], self._a())
+        self.memory.set(addresses[1], self._a())
     else:
       self._log("Condition not fulfilled.")
     
@@ -174,13 +189,13 @@ class CPU:
       if self._trommel(self._b()) == 644:
         print("Z22 Output: ", end="")
         print(self._a())
+        return True
       elif self._trommel(self._b()) == 800:
-        pass
+        return True
       elif self._trommel(self._b()) == 840:
-        pass
+        return True
       elif self._trommel(self._b()) == 1000:
-        pass
-      return True
+        return True
     return False
     
   
@@ -190,13 +205,13 @@ class CPU:
     if self._chk(befehl, 'PP'):
       return self._a() > 0
     if self._chk(befehl, 'QQ'):
-      return self._a() < 0
+      return dec(self._a().getBinary()) < 0
     if self._chk(befehl, 'P'):
-      return self.memory.get(2) >= 0
+      return dec(self.memory.get(2).getBinary()) >= 0
     if self._chk(befehl, 'Q'):
-      return self.memory.get(2) < 0
+      return dec(self.memory.get(2).getBinary()) < 0
     if self._chk(befehl, 'Y'):
-      return bin(self.memory.get(3))[-1] == "1"
+      return bin(self.memory.get(3).getInt())[-1] == "1"
     return True
     
   def _parseCommand(self, commandString):
