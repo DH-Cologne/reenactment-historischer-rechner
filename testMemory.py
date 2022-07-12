@@ -116,6 +116,11 @@ class MemoryTest(unittest.TestCase):
         self.assertRaises(Exception, wort.parse, input12)
         input13 = 'καλημέρα'  # parse nicht möglich --> Exception
         self.assertRaises(Exception, wort.parse, input13)
+        inp = 'CI15'
+        bef = wort.parse(inp)
+        self.assertIsInstance(bef, wort.Befehl)
+        self.assertEqual(str(bef), "CI15")
+        self.assertCountEqual(bef.getBinary(), [1,0, 0,0,0,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0, 0,1,1,1,1, 0,0,0,0,0,0,0,0,0,0,0,0,0])
 
     # parseBinary Methode überprüfen für alle Objekttypen
     def testParseBinary(self):
@@ -137,6 +142,27 @@ class MemoryTest(unittest.TestCase):
         bin7 = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 1, 1, 1, 1, 0]
         self.assertRaises(Exception, wort.parseBinary, bin7)
+        bin8 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1]
+        self.assertEqual(38, len(bin8))
+        #befehl = wort.parseBinary(bin8)
+        #self.assertIsInstance(befehl, wort.Befehl)
+        
+        
+        binString = [1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        self.assertEqual(38, len(binString))
+        befehl = wort.parseBinary(binString)
+        self.assertIsInstance(befehl, wort.Befehl)
+        self.assertEqual("LLA0", str(befehl))
+        
+        binString = [1,0, 0,0,0,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0, 0,1,1,1,1, 0,0,0,0,0,0,0,0,0,0,0,0,0]
+        self.assertEqual(38, len(binString))
+        befehl = wort.parseBinary(binString)
+        self.assertIsInstance(befehl, wort.Befehl)
+        self.assertEqual("CI15", str(befehl))
+        
+        
+        
+  
 
     # getBinary Funktion von Klartext Klasse überprüfen
     def testKlartextGetBinary(self):
