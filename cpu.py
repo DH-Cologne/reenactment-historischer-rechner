@@ -27,6 +27,10 @@ Befehle = {
 def dec(bl):
   return int("".join([str(x) for x in bl]), 2)
 
+def xbin(i, length=38):
+  l = [int(x) for x in bin(i)[2:]]
+  return [0] * (length-len(l)) + l
+
 class CPU:
   
   def __init__(self, memory, iomemory, verbose=False, interactive=False):
