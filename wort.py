@@ -194,6 +194,12 @@ class Wort:
 
     def __repr__(self):
         return self.strWort
+    
+    def getBinary(self) -> list:
+        pass
+    
+    def bstr(self):
+        return "".join([str(x) for x in self.getBinary()])
 
 
 class Befehl(Wort):
