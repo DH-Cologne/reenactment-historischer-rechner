@@ -26,6 +26,8 @@ class Memory:
     def set(self, zelle, word):
         """ Saves word as object of class Wort in given cell """
 
+        if zelle == 0:
+            return
         # if string parse string to object of class Wort
         if type(word) == str or type(word) == int:
             if zelle in list(self.memory.keys()):

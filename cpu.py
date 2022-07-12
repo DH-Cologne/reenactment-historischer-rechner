@@ -58,10 +58,8 @@ class CPU:
     # Execute it
     # (This will need to be partially reimplemented once we have a new representation of the commands)
     
-    # Uncomment after bug is fixed
-    self.iomemory.collectMemory(self.memory)
     
-    self._log("==== CPU executes step ", self.currentStep, " ====")
+    self._log("\n\n==== CPU executes step ", self.currentStep, " ====")
     self._log("CPU status: b=",str(self._b()), ", c=",str(self._c()), ", a=", self._a())
     
     if a != None:
@@ -147,8 +145,10 @@ class CPU:
     # 3. ... and put the command for getting the next command into the Befehlsregister
     self._b(self._c())
 
+    self.iomemory.collectMemory(self.memory)
+
     if self.currentStep > 0:
-      self.iomemory.printMemory(self.currentStep, mode="changes", old_step=self.currentStep-2)
+      self.iomemory.printMemory(self.currentStep, mode="changes", old_step=self.currentStep-1)
     
     # finally, some logging
     self._log("CPU status after: b=",str(self._b()), ", c=",str(self._c()), ", a=", self._a())
