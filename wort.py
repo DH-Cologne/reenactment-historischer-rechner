@@ -36,6 +36,8 @@ def parse(input):
             raise Exception(f"Objekttyp für Input {wort} konnte nicht identifiziert werden. \n Bitte Input überprüfen.")
     elif type(input) == int:
         obj = Ganzzahl(str(input))
+    else:
+        raise ValueError
     return obj
 
 
@@ -450,11 +452,15 @@ class Klartext(Wort):
 
 class Ganzzahl(Wort):
 
-    def __init__(self, strWort: str):
-        super().__init__(strWort)
-        self.float_rep = float(self.strWort)
-        if abs(self.float_rep) > (2 ** 35) - 1 or self.float_rep % 1 != 0.0:
-            raise Exception(f"Strichzahl {self.float_rep} is out of bound.")
+    def __init__(self, strWort):
+
+        if strWort.__contains__('.'):
+            raise Exception(f"Float {strWort} is out of bound.")
+        elif abs(int(strWort)) > (2 ** 35) - 1:
+            raise Exception(f"Strichzahl {int(strWort)} is out of bound.")
+        else:
+            super().__init__(strWort)
+            self.int_rep = int(strWort)
 
     def getBinary(self) -> list:
         """
@@ -467,9 +473,9 @@ class Ganzzahl(Wort):
         while len(bin_number) < 35:
             bin_number.insert(0, 0)
 
-        if self.float_rep >= 0:
+        if int(self.int_rep) >= 0:
             bin_number = [0, 0, 0] + bin_number
-        if self.float_rep < 0:
+        if self.int_rep < 0:
             bin_number = [1, 1, 1] + bin_number
 
         bin_number = [int(item) for item in bin_number]
@@ -477,7 +483,7 @@ class Ganzzahl(Wort):
         return bin_number
 
     def getInt(self) -> int:
-        return int(self.strWort)
+        return self.int_rep
     
     def __int__(self) -> int:
         """
@@ -501,6 +507,11 @@ if __name__ == '__main__':
     w12 = parse('1\'')
     w13 = parse(1)
     w14 = parse('I1')
+    # w15 = parse('1256782340891236\'')
+    # w16 = parse('1.9\'')
+    # w17 = parse(1.9)
+    # w18 = parse('1.0\'')
+    # w19 = parse(12567823408)
 
     print('Typ von String {} ist {}'.format(w1.strWort, type(w1)))
     print('Typ von String {} ist {}'.format(w2.strWort, type(w2)))
