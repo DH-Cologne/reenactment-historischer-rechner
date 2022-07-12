@@ -198,8 +198,11 @@ class Wort:
     def getBinary(self) -> list:
         pass
     
-    def bstr(self):
-        return "".join([str(x) for x in self.getBinary()])
+    def bstr(self, split=False):
+        s = "".join([str(x) for x in self.getBinary()])
+        if split:
+            s = " ".join([s[0:2], s[2:7], s[7:20], s[20:25], s[25:38]]) 
+        return s
 
 
 class Befehl(Wort):
