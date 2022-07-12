@@ -89,23 +89,23 @@ class CPU:
     
     # Sprungbefehle E and F
     if self._applyConditions(befehl):
-      if self._b().isJumpOrCall:
+      # C
+      if self._chk(befehl, 'C'): 
+        operands[1] = dec(befehl[20:38])
+      # LL
+      if self._chk(befehl, 'LL'):
+        self._a(wort.parse(self._a().getBinary()[2:] + [0,0]))
+      # R
+      if self._chk(befehl, 'R'):
+        self._a(wort.parse([0] + self._a().getBinary()[0:-1]))
+      
+      if self._applyOSCommand(befehl):
+            pass
+      elif self._chk(befehl, 'F') or (not self._chk(befehl, 'A') and not self._chk(befehl, 'U')):
         if self._chk(befehl, 'F'):
-          print(befehl)
-          # check for calls of the operating system
-          if self._trommel(self._b()) == 644:
-            print(self._a())
-            return
-          elif self._trommel(self._b()) == 800:
-            pass
-          elif self._trommel(self._b()) == 840:
-            pass
-          elif self._trommel(self._b()) == 1000:
-            pass
-          else:
             self.memory.set(5, self._c())
-        self._b(self.memory.get(operands[1]))
-        self._c("E" + str(operands[1]+1))
+        self._c("E" + str(address+1))
+        self._b(operands[1])
         
         # self.iomemory.printMemory(self.currentStep, mode="changes", old_step=self.currentStep-1)
         self._log("CPU status after: b=",str(self._b()), ", c=",str(self._c()), ", a=", self._a())
@@ -161,6 +161,21 @@ class CPU:
   
   def _schnell(self, befehl) -> int:
     return dec(befehl.getBinary()[20:25])
+  
+  def _applyOSCommand(self, befehl) -> bool:
+    if self._chk(befehl, 'F'):
+      if self._trommel(self._b()) == 644:
+        print("Z22 Output: ", end="")
+        print(self._a())
+      elif self._trommel(self._b()) == 800:
+        pass
+      elif self._trommel(self._b()) == 840:
+        pass
+      elif self._trommel(self._b()) == 1000:
+        pass
+      return True
+    return False
+    
   
   def _applyConditions(self, befehl) -> bool:
     if self._chk(befehl, 'PP') and self._chk(befehl, 'QQ'):
